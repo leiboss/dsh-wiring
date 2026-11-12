@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-wiring",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Wire shipped-but-unmounted DeepSeek Harness capabilities and explain what is missing.",

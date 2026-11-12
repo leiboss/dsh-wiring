@@ -1,4 +1,4 @@
-Status: not submitted — installation verification pending
+Status: ready to submit — install verified in a local profile; LSP happy path requires a language server.
 
 # Catalog submission material
 

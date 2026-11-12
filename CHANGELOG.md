@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- 新增 [docs/INSTALL.md](docs/INSTALL.md)：tarball 安装（推荐）与「先装 7 个官方依赖再装目录」两种受支持方式，附排查表。
+- 记录目录安装的 `link:` 语义：被链接的包不会安装自己的 dependencies，相关行会 `ERR_MODULE_NOT_FOUND`。
+- 记录本地 profile 的实测验收结果（9 个 `wiring-*` 行、四项工具、两个受控行 disabled）。
+- `scripts/rename-scope.mjs` 排除 `docs/VERIFICATION.md`：归档记录不随作用域改名。
+
 ## 0.3.0
 
 - 新增 webhook 能力：挂载 `@deepseek-ai/dsh-webhook` 运行时、一个 `pull_request` 规则子路径行，以及默认禁用的签名 GitHub 入口。

@@ -60,12 +60,16 @@ function collect(file, transform) {
   return changes
 }
 
+/** Archived verification records are historical: never rewrite them. */
+const EXCLUDED = new Set(['docs/VERIFICATION.md'])
+
 const changes = [
   ...collect('package.json', renamePackageJson),
   ...collect('cordis.patch.yml', renamePatch),
   ...collect('README.md', renameMarkdown),
   ...readdirSync(join(root, 'docs'))
     .filter((entry) => entry.endsWith('.md'))
+    .filter((entry) => !EXCLUDED.has(join('docs', entry)))
     .flatMap((entry) => collect(join('docs', entry), renameMarkdown)),
 ]
 

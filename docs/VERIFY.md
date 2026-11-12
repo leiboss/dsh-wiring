@@ -21,7 +21,7 @@
 
 **期望**：安装成功；`@local/dsh-wiring` 出现在该 profile 的 bundle 列表；未出现 peer 解析错误。
 
-**证据**：`plugin_manager` 返回的安装结果（含包名与版本 0.1.0）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@local/dsh-wiring`。
+**证据**：`plugin_manager` 返回的安装结果（含包名与当前版本，见 `package.json`）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@local/dsh-wiring`。
 
 ---
 

@@ -49,6 +49,8 @@ dsh plugin add github:leiboss/dsh-wiring
    node scripts/rename-scope.mjs --scope <your-scope> --apply
    ```
 
+   `docs/VERIFICATION.md` 是归档记录，不参与改名（脚本已排除），以免篡改历史。
+
 2. 把 `package.json` 的 `"private": true` 改为 `false`。
 3. `npm publish --access public`。
 4. 校验产物可下载：

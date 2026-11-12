@@ -15,9 +15,12 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 安装（在 DSH 会话内执行，路径必须是绝对路径）：
 
 ```text
-plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
+pnpm pack                       # 生成 local-dsh-wiring-<version>.tgz
+plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
 # 重启该 profile；bundle patch 在下次启动时生效
 ```
+
+**目录安装不被直接支持**：`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会以 `ERR_MODULE_NOT_FOUND` 失败。请用 tarball，或先按 [docs/INSTALL.md](docs/INSTALL.md) 的方式 B 显式安装依赖再装目录。
 
 当前包名是 `@local/dsh-wiring`（`private: true`，仅 GitHub 分发）；改到真实 npm 作用域的步骤见 [docs/RELEASE.md](docs/RELEASE.md)。
 
