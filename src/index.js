@@ -31,7 +31,6 @@ export const inject = ['subprocess', 'tools']
  * @property {string[]} [paths] kind=paths: candidate absolute paths; any hit passes.
  * @property {string} [service] Context service name to look up.
  * @property {string} [install] Copy-pasteable install command.
- * @property {string} [hint] Extra non-command guidance.
  */
 
 /**
