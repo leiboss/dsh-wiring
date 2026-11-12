@@ -1,5 +1,7 @@
 # dsh-wiring
 
+[![CI](https://github.com/leiboss/dsh-wiring/actions/workflows/ci.yml/badge.svg)](https://github.com/leiboss/dsh-wiring/actions/workflows/ci.yml)
+
 **Wire what ships. Diagnose what doesn't.**
 
 DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepseek-ai/dsh-lsp-stdio`、`@deepseek-ai/dsh-tool-lsp`，但 `dsh-base` 与 `dsh-web-app` 的 patch 里没有任何 lsp 行：默认安装既没有 `lsp` 工具，也没有任何东西告诉你它为什么不在。本包把这三行接上，并提供一个只读的 `lsp_status` 诊断。
@@ -16,6 +18,8 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
 # 重启该 profile；bundle patch 在下次启动时生效
 ```
+
+当前包名是 `@local/dsh-wiring`（`private: true`，仅 GitHub 分发）；改到真实 npm 作用域的步骤见 [docs/RELEASE.md](docs/RELEASE.md)。
 
 > **安装时的 peer 警告是预期行为。** pnpm 会报 `missing peer @deepseek-ai/dsh-llm@0.2.2-rc.1` 一类警告：宿主包由 DSH 加载器从安装目录解析，profile 不安装它们（`autoInstallPeers=false`）。判定安装成功不看警告，只看 `cordis_inspect_query(Config)` 能否查到 `@deepseek-ai/dsh-lsp-stdio`。不要为此在仓库里执行 `npm install`——本包没有开发依赖，也不需要本地安装。
 

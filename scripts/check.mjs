@@ -49,7 +49,9 @@ const source = srcFiles.map((file) => readFileSync(file, 'utf8')).join('\n')
 // 1. package.json contract -----------------------------------------------------
 {
   const problems = []
-  if (pkg.name !== '@local/dsh-wiring') problems.push(`name is ${String(pkg.name)}`)
+  if (typeof pkg.name !== 'string' || !/^@[a-z0-9][a-z0-9._-]*\/dsh-wiring$/.test(pkg.name)) {
+    problems.push(`name is ${String(pkg.name)}`)
+  }
   if (pkg.type !== 'module') problems.push('type must be module')
   if (pkg.dsh?.bundle?.patch !== './cordis.patch.yml') problems.push('dsh.bundle.patch must be ./cordis.patch.yml')
   if (typeof pkg.exports?.['./icon'] !== 'string') problems.push('missing exports["./icon"]')

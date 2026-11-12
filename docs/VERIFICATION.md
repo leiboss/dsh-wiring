@@ -1,9 +1,15 @@
 # 安装与验收记录
 
+## 当前状态
+
+- 三个能力已接线：LSP、Browser、GitHub Webhook。
+- 安装验收**未执行**（本环境无 DSH 会话、无 `dsh` CLI）。
+- 真实 `lsp` 调用、浏览器工具调用、webhook 401/202 均待人工验证。
+
 - **日期**：2026-11-12
 - **仓库**：`dsh-wiring`，基线 commit `1482aea`（本文件所在提交为其后继）
 - **宿主版本**：`package.json` 的 `engines.dsh` = `>=0.2.2-rc.1 <0.3.0-0`；当前环境无 `dsh` CLI（`dsh --version` → command not found），因此**安装与 profile 验收未在本环境执行**
-- **包**：`@local/dsh-wiring@0.2.0`
+- **包**：`@local/dsh-wiring@0.3.0`
 
 ## 1. 检查项
 

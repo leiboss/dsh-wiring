@@ -27,7 +27,7 @@ export const capability = {
 }
 ```
 
-`blastRadius` 不是 `'tool'` 时，`defaultEnabled` 必须为 `false`，且 patch 对应行必须写 `disabled: true`；`scripts/check.mjs` 的 R8 会交叉校验。
+`blastRadius` 不是 `'tool'` 时，`defaultEnabled` 必须为 `false`，且 patch 对应行必须写 `disabled: true`；`scripts/check.mjs` 的 R8 会交叉校验。**新增 session / ingress 能力必须默认关闭，否则 R8 会红。**
 
 ### 2. 注册到能力数组
 
@@ -55,6 +55,8 @@ const capabilities = [lsp, browser]
 node scripts/check.mjs
 node test/engine.test.mjs
 node test/lsp.test.mjs
+node test/browser.test.mjs
+node test/webhook.test.mjs
 ```
 
 不要用 `node --test` 启动整个目录：受限沙箱会为每个文件 spawn 子进程并失败（`spawn EPERM`）。直接 `node <file>`。
