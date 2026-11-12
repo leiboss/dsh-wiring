@@ -26,7 +26,9 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 
 tarball 走正常的依赖解析，7 个官方包会一并落进 profile 的 `node_modules`；宿主 peer（`cordis`、`dsh-llm`、`dsh-fs`…）仍由 DSH 加载器从安装目录解析。
 
-## 方式 B：先显式安装依赖，再装目录
+## 目录安装（不受支持，仅记录现象）
+
+下面的做法有时能让 `link:` 解析到依赖，但它**不是受支持的安装路径**——本包的 7 个官方依赖仍需手工维护，且与宿主版本线容易漂移。请用方式 A。
 
 ```powershell
 dsh plugin --profile web add `
@@ -40,7 +42,13 @@ dsh plugin --profile web add `
 plugin_manager  action: install_bundle  target: "<仓库绝对路径>"
 ```
 
-依赖已经落在 profile 根后，`link:` 的目录也能解析到它们。适合在仓库里持续改代码的场景。
+## 从 GitHub 安装（未验证）
+
+```sh
+dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
+```
+
+需 git 与网络；`github:` 简写会被 pnpm 解析成 `git+ssh://git@github.com/...`，没有 SSH key 会失败，因此必须显式用 `git+https`。该路径**未在本仓库验证**。
 
 ## 安装后的期望
 

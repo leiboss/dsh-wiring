@@ -30,17 +30,20 @@
 
 ### A. GitHub-only（当前状态）
 
-`package.json` 仍是 `"private": true` 与 `@local/dsh-wiring` 作用域。适用方式：
-
-```text
-plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
-```
-
-或直接从 GitHub 安装：
+`package.json` 仍是 `"private": true` 与 `@local/dsh-wiring` 作用域。受支持的方式：
 
 ```sh
-dsh plugin add github:leiboss/dsh-wiring
+# 推荐：tarball（已验证）
+pnpm pack
+plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
 ```
+
+```sh
+# 备选：从 GitHub 安装（需 git 与网络；未验证）
+dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
+```
+
+> 目录安装不受支持（`link:` 不装依赖）。见 [INSTALL.md](INSTALL.md)。
 
 ### B. npm
 

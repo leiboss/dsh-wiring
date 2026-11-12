@@ -13,13 +13,17 @@
 
 ## 1. 安装 bundle
 
-**操作**：在 DSH 会话中调用 `plugin_manager` 的 `install_bundle`，参数使用绝对路径：
+**操作**：先打包，再用 tarball 安装（目录安装不受支持，见 [INSTALL.md](INSTALL.md)）：
 
-```json
-{ "path": "/absolute/path/to/dsh-wiring" }
+```sh
+pnpm pack
 ```
 
-**期望**：安装成功；`@local/dsh-wiring` 出现在该 profile 的 bundle 列表；未出现 peer 解析错误。
+```text
+plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+```
+
+**期望**：安装成功；`@local/dsh-wiring` 出现在该 profile 的 bundle 列表；`wiring-*` 行数为 9（其中 2 个 disabled）；安装日志中的 `missing peer` 警告属预期。
 
 **证据**：`plugin_manager` 返回的安装结果（含包名与当前版本，见 `package.json`）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@local/dsh-wiring`。
 

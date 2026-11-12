@@ -29,17 +29,19 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 
 ## 安装
 
-本地目录（DSH 会话内）：
-
-```text
-plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
+```sh
+# 推荐：tarball（已在真实 profile 中验证）
+pnpm pack
+plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
 ```
 
-或：
+备选：直接从 GitHub 安装（需 git 与网络；**未在本仓库验证**，且请显式用 `git+https`，`github:` 简写默认走 SSH）：
 
 ```sh
-dsh plugin add github:leiboss/dsh-wiring
+dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 ```
+
+> 目录安装（`install_bundle target="<目录>"`）**不受支持**：pnpm 以 `link:` 挂载，不安装本包的 7 个官方依赖，相关行会 `ERR_MODULE_NOT_FOUND`。详见 [INSTALL.md](INSTALL.md)。
 
 ## 差异化
 
@@ -68,8 +70,10 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 或直接从 GitHub 安装：
 
 ```sh
-dsh plugin add github:leiboss/dsh-wiring
+dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 ```
+
+（需 git 与网络；`github:` 简写默认走 SSH，未验证。）
 
 #### 能力声明
 
