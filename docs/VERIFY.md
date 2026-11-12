@@ -45,6 +45,8 @@ plugin_manager listConfigs
 
 **证据**：`listConfigs` 输出包含 `@deepseek-ai/dsh-lsp-stdio`；`cordis_inspect_query` 返回的四行快照。
 
+安装日志里出现 missing peer 警告是预期行为（宿主包由加载器提供）；只有 `listConfigs` 查不到条目才算依赖解析失败，此时回退为 `dsh plugin --profile web add @deepseek-ai/dsh-lsp @deepseek-ai/dsh-lsp-stdio @deepseek-ai/dsh-tool-lsp`。
+
 ---
 
 ## 3. 确认两个工具都出现

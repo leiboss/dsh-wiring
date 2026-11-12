@@ -1,0 +1,6 @@
+# The bundle is loaded from a checkout on Windows and Linux alike: force LF so a
+# CRLF checkout cannot change what the patch, JS, or JSON parsers see.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary

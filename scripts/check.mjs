@@ -27,7 +27,9 @@ function check(label, condition, message) {
 }
 
 function read(relative) {
-  return readFileSync(join(root, relative), 'utf8')
+  // Strip a UTF-8 BOM: PowerShell's Set-Content -Encoding UTF8 writes one, and
+  // JSON.parse rejects it with "Unexpected token '\uFEFF'".
+  return readFileSync(join(root, relative), 'utf8').replace(/^\uFEFF/, '')
 }
 
 function walk(dir) {
@@ -101,7 +103,9 @@ const source = srcFiles.map((file) => readFileSync(file, 'utf8')).join('\n')
 let patchText = ''
 {
   const problems = []
-  patchText = read('cordis.patch.yml')
+  // Normalize newlines: a Windows checkout yields CRLF, and comparing raw
+  // line endings made this check fail on the windows-latest CI runner.
+  patchText = read('cordis.patch.yml').replace(/\r\n?/g, '\n')
   if (patchText.includes('\t')) problems.push('patch contains a tab character')
 
   const active = patchText
@@ -109,7 +113,7 @@ let patchText = ''
     .filter((line) => !/^\s*#/.test(line))
     .join('\n')
   const firstLine = active.split('\n').find((line) => line.trim() !== '')
-  if (firstLine !== '- insert:') problems.push(`first non-comment line is "${String(firstLine)}"`)
+  if (firstLine?.trim() !== '- insert:') problems.push(`first non-comment line is "${String(firstLine)}"`)
 
   const ids = [...active.matchAll(/^\s*- id:\s*(\S+)\s*$/gm)].map((match) => match[1])
   if (ids.length < 4) problems.push(`found ${ids.length} rows, expected at least 4`)

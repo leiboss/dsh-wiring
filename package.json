@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-wiring",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Wire shipped-but-unmounted DeepSeek Harness capabilities and explain what is missing.",
@@ -9,8 +9,8 @@
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
   "engines": { "dsh": ">=0.2.2-rc.1 <0.3.0-0" },
   "dependencies": {
-    "@deepseek-ai/dsh-lsp": "0.0.1-rc.1",
-    "@deepseek-ai/dsh-lsp-stdio": "0.0.1-rc.5",
-    "@deepseek-ai/dsh-tool-lsp": "0.0.1-rc.1"
+    "@deepseek-ai/dsh-lsp": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-lsp-stdio": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tool-lsp": "0.2.2-rc.1"
   }
 }

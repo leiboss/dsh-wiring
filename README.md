@@ -11,9 +11,11 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 安装（在 DSH 会话内执行，路径必须是绝对路径）：
 
 ```text
-plugin_manager install_bundle  { "path": "/absolute/path/to/dsh-wiring" }
+plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
 # 重启该 profile；bundle patch 在下次启动时生效
 ```
+
+> **安装时的 peer 警告是预期行为。** pnpm 会报 `missing peer @deepseek-ai/dsh-llm@0.2.2-rc.1` 一类警告：宿主包由 DSH 加载器从安装目录解析，profile 不安装它们（`autoInstallPeers=false`）。判定安装成功不看警告，只看 `cordis_inspect_query(Config)` 能否查到 `@deepseek-ai/dsh-lsp-stdio`。不要为此在仓库里执行 `npm install`——本包没有开发依赖，也不需要本地安装。
 
 验收：按 [docs/VERIFY.md](docs/VERIFY.md) 的 8 步执行，其中包含「语言服务器缺失时会话仍可创建」这一失败场景。
 
