@@ -1,0 +1,4 @@
+{
+  "meta": { "title": "Wiring", "description": "Wires shipped-but-unmounted capabilities and reports what is missing." },
+  "capabilities": { "lsp": { "title": "Language servers" } }
+}

@@ -1,0 +1,135 @@
+# 安装后验收（8 步）
+
+本文件是**人工验收**清单：单元测试与静态检查不覆盖真实挂载、真实语言服务器与卸载洁净度。
+每一步都写清「操作 → 期望 → 证据」。命令与工具调用以绝对路径为准；Windows 与 POSIX 的路径写法可以不同，语义相同。
+
+前置：
+
+- DSH 0.2.2-rc.1，profile 已能正常启动。
+- 本仓库位于 `/absolute/path/to/dsh-wiring`（下称 `<bundle>`）。
+- 一个含 `.ts` 文件的真实工作区（下称 `<workspace>`）。
+
+---
+
+## 1. 安装 bundle
+
+**操作**：在 DSH 会话中调用 `plugin_manager` 的 `install_bundle`，参数使用绝对路径：
+
+```json
+{ "path": "/absolute/path/to/dsh-wiring" }
+```
+
+**期望**：安装成功；`@local/dsh-wiring` 出现在该 profile 的 bundle 列表；未出现 peer 解析错误。
+
+**证据**：`plugin_manager` 返回的安装结果（含包名与版本 0.1.0）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@local/dsh-wiring`。
+
+---
+
+## 2. 确认官方 provider 已挂载
+
+**操作**：
+
+```text
+plugin_manager listConfigs
+```
+
+或对合成树做一次检查：
+
+```json
+{ "id": "wiring-lsp-typescript" }
+```
+
+配合 `cordis_inspect_query` 查询该行的 `name` 与 `config`。
+
+**期望**：存在 id 为 `wiring-lsp`、`wiring-lsp-typescript`、`wiring-lsp-tool`、`wiring-doctor` 的四行；`wiring-lsp-typescript` 的 `name` 是 `@deepseek-ai/dsh-lsp-stdio`，`config.servers.typescript.command` 是 `typescript-language-server`。
+
+**证据**：`listConfigs` 输出包含 `@deepseek-ai/dsh-lsp-stdio`；`cordis_inspect_query` 返回的四行快照。
+
+---
+
+## 3. 确认两个工具都出现
+
+**操作**：`Tool.listTools`。
+
+**期望**：同时出现官方模型工具 `lsp` 与本包的 `lsp_status`；`lsp_status` 的描述说明它报告本机是否具备该能力。
+
+**证据**：`Tool.listTools` 输出中两条工具记录（名称 + 描述首句）。
+
+---
+
+## 4. 真实符号跳转
+
+**操作**：新建会话，工作目录设为 `<workspace>`，对真实 TypeScript 源文件调用 `lsp`：
+
+```json
+{
+  "operation": "goToDefinition",
+  "file_path": "/absolute/path/to/workspace/src/example.ts",
+  "line": 10,
+  "character": 7
+}
+```
+
+坐标是 **1-based** 的 UTF-16 行列；光标要落在符号上。
+
+**期望**：返回该符号的定义位置（`path:line:character`），而不是 `No results.` 或 `LSP_UNAVAILABLE`。
+
+**证据**：`lsp` 工具结果里包含目标文件与定义行号；同一位置用编辑器跳转可复现。
+
+---
+
+## 5. 遮蔽二进制后的降级
+
+**操作**：
+
+1. 让 `typescript-language-server` 从 PATH 消失（临时改名，或把 PATH 指向一个不含它的目录）。
+2. 重启该 profile。
+3. 调用 `lsp_status`（`{}` 无参数）。
+4. 新建一个会话。
+
+**期望**：
+
+- `lsp_status` 返回 `ok: false`；`typescript` 项 `detail` 为 `not found on PATH`，`next` 为 `npm install -g typescript-language-server typescript`。
+- **会话仍可创建**：bundle 的 `apply()` 不探测、不抛错，缺二进制只影响 `lsp` 调用本身。
+
+**证据**：`lsp_status` 的完整文本输出（含 `install:` 行）；新会话创建成功的记录。
+
+---
+
+## 6. 恢复二进制
+
+**操作**：还原第 5 步的改名/PATH 改动，重启 profile，再调用一次 `lsp_status`。
+
+**期望**：`ok: true`；`typescript` 项 `detail` 是解析到的绝对路径。
+
+**证据**：`lsp_status` 输出中的绝对路径与 `command -v typescript-language-server`（Windows：`where typescript-language-server`）一致。
+
+---
+
+## 7. 卸载后工具消失
+
+**操作**：通过 `plugin_manager` 卸载 `@local/dsh-wiring`，重启 profile，再调用 `Tool.listTools`。
+
+**期望**：`lsp` 与 `lsp_status` 都消失（四行 patch 随 bundle 一起移除）；profile 仍能正常启动。
+
+**证据**：卸载结果 + 重启后的 `Tool.listTools` 输出（不再包含这两个名称）。
+
+---
+
+## 8. profile patch 未被改写
+
+**操作**：对比安装前、使用中、卸载后的 `<profile>/cordis.patch.yml` 与 `$DSH_HOME/cordis.patch.yml`。
+
+**期望**：本包从未写入这两个文件；doctor 只读。若安装过程由 `plugin_manager` 追加了 bundle 引用，那属于安装器的正常行为，而不是本包写 profile。
+
+**证据**：三个时间点的文件 diff（除安装器自身的 bundle 列表变更外为空）；`git status`（若 profile 在版本控制下）无意外改动。
+
+---
+
+## 失败时的定位顺序
+
+1. 第 2 步没有 `@deepseek-ai/dsh-lsp-stdio` → patch 没被应用，检查 `dsh.bundle.patch` 与 profile 的 bundle 顺序。
+2. 第 3 步没有 `lsp_status` → `wiring-doctor` 行未激活，检查 `apply()` 是否抛错与 `inject` 是否满足。
+3. 第 3 步有 `lsp_status` 但没有 `lsp` → 官方 tool 行或 seam 行未激活。
+4. 第 4 步 `LSP_UNAVAILABLE` → `extensionToLanguage` 未覆盖该扩展名，或 provider 未被注册。
+5. 第 4 步 `not found on PATH`（来自工具调用）→ 语言服务器没装；用第 5 步的 `lsp_status` 确认。

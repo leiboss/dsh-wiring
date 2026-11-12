@@ -1,0 +1,74 @@
+# The dsh-wiring bundle patch: one insert that mounts the shipped LSP packages
+# and this package's read-only doctor over the profile root.
+#
+# Row order carries no load semantics (activation is service-availability
+# driven); the listed order is the order a reader should follow.
+#
+# ONE LANGUAGE PER ROW. Every entry in a `servers` record resolves at load, and
+# a single bad entry rolls back every provider registered by that instance. Two
+# languages in one row would therefore take each other down; separate rows fail
+# independently.
+
+- insert:
+    - id: wiring-lsp
+      name: '@deepseek-ai/dsh-lsp'
+
+    - id: wiring-lsp-typescript
+      name: '@deepseek-ai/dsh-lsp-stdio'
+      config:
+        servers:
+          typescript:
+            command: typescript-language-server
+            args: ['--stdio']
+            extensionToLanguage:
+              '.ts': typescript
+              '.tsx': typescriptreact
+              '.mts': typescript
+              '.cts': typescript
+              '.js': javascript
+              '.jsx': javascriptreact
+              '.mjs': javascript
+              '.cjs': javascript
+
+    - id: wiring-lsp-tool
+      name: '@deepseek-ai/dsh-tool-lsp'
+
+    - id: wiring-doctor
+      name: '@local/dsh-wiring'
+
+    # ── Optional languages: copy one block at a time ─────────────────────────
+    #
+    # Python (pyright): npm install -g pyright
+    #
+    #   - id: wiring-lsp-python
+    #     name: '@deepseek-ai/dsh-lsp-stdio'
+    #     config:
+    #       servers:
+    #         python:
+    #           command: pyright-langserver
+    #           args: ['--stdio']
+    #           extensionToLanguage:
+    #             '.py': python
+    #             '.pyi': python
+    #
+    # Go (gopls): go install golang.org/x/tools/gopls@latest
+    #
+    #   - id: wiring-lsp-go
+    #     name: '@deepseek-ai/dsh-lsp-stdio'
+    #     config:
+    #       servers:
+    #         go:
+    #           command: gopls
+    #           extensionToLanguage:
+    #             '.go': go
+    #
+    # Rust (rust-analyzer): rustup component add rust-analyzer
+    #
+    #   - id: wiring-lsp-rust
+    #     name: '@deepseek-ai/dsh-lsp-stdio'
+    #     config:
+    #       servers:
+    #         rust:
+    #           command: rust-analyzer
+    #           extensionToLanguage:
+    #             '.rs': rust
