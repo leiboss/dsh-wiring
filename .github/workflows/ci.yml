@@ -27,3 +27,5 @@ jobs:
         run: node test/browser.test.mjs
       - name: Webhook tests
         run: node test/webhook.test.mjs
+      - name: Rename-scope tests
+        run: node test/rename-scope.test.mjs

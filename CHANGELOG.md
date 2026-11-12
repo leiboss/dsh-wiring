@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- 修复 `rename-scope` 在 Windows 上未排除归档记录：排除集合按文件名比较，不再拼路径（`join` 在 Windows 产出 `\`）。
+- 抽出纯函数 `planRename(root, scope)`，输出统一为相对 POSIX 路径；脚本被 `import` 时不执行副作用。
+- 新增 `test/rename-scope.test.mjs`（归档排除、幂等、覆盖范围、路径形态），CI 覆盖该脚本。
+
 ## 0.3.1
 
 - 新增 [docs/INSTALL.md](docs/INSTALL.md)：tarball 安装（推荐）与「先装 7 个官方依赖再装目录」两种受支持方式，附排查表。
