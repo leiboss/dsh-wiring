@@ -4,7 +4,8 @@
 
 - 新增 [docs/INSTALL.md](docs/INSTALL.md)：tarball 安装（推荐）与「先装 7 个官方依赖再装目录」两种受支持方式，附排查表。
 - 记录目录安装的 `link:` 语义：被链接的包不会安装自己的 dependencies，相关行会 `ERR_MODULE_NOT_FOUND`。
-- 记录本地 profile 的实测验收结果（9 个 `wiring-*` 行、四项工具、两个受控行 disabled）。
+- 记录 TypeScript 前置：tsserver 只从工作区解析，需 `typescript@5`；TypeScript 7 不含 `lib/tsserver.js`，不兼容。
+- 记录本地 profile 的实测结果：安装（tarball）通过，LSP 三种操作已验证。
 - `scripts/rename-scope.mjs` 排除 `docs/VERIFICATION.md`：归档记录不随作用域改名。
 
 ## 0.3.0

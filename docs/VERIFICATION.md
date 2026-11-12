@@ -3,8 +3,9 @@
 ## 当前状态
 
 - 三个能力已接线：LSP、Browser、GitHub Webhook。
-- 安装**已在本地 profile 中实测通过**：`list_plugins` 出现 9 个 `wiring-*` 行，`wiring-browser-playwright` 与 `wiring-webhook-github` 为 `disabled`；工具表出现 `lsp`、`lsp_status`、`browser_status`、`webhook_status`，未出现 `mcp__playwright-mcp__*`。
-- LSP 正向路径**未验证**：`wiring-lsp-typescript` 需要 `typescript-language-server`，本机未安装。
+- 安装**已验证（tarball）**：`list_plugins` 出现 9 个 `wiring-*` 行，`wiring-browser-playwright` 与 `wiring-webhook-github` 为 `disabled`；工具表出现 `lsp`、`lsp_status`、`browser_status`、`webhook_status`，未出现 `mcp__playwright-mcp__*`。
+- **LSP 三种操作已验证**（需工作区内 `typescript@5` + 全局 `typescript-language-server`；TypeScript 7 不支持）。
+- webhook 入口（401/202 与建会话）与浏览器工具调用仍待人工。
 
 - **日期**：2026-11-12
 - **仓库**：`dsh-wiring`，基线 commit `1482aea`（本文件所在提交为其后继）
@@ -25,7 +26,7 @@
 | `listConfigs @deepseek-ai/dsh-lsp-stdio` | 返回条目 + `packageDir` | 返回条目，`packageDir` 指向 profile 根 `node_modules` | 通过 |
 | `listConfigs @deepseek-ai/dsh-browser-use` | 返回条目 + `packageDir` | 返回条目 | 通过 |
 | `listTools` | 含 `lsp` / `lsp_status` / `browser_status` / `webhook_status`，无 `mcp__playwright-mcp__*` | 四项均在；无 `mcp__playwright-mcp__*` | 通过 |
-| `list_plugins` 行状态 | 9 个 `wiring-*` 行；playwright 与 webhook-github disabled | 9 行齐全；两行为 `disabled`；`wiring-lsp-typescript` 未 active（缺语言服务器） | 通过（LSP provider 待装语言服务器） |
+| `list_plugins` 行状态 | 9 个 `wiring-*` 行；playwright 与 webhook-github disabled | 9 行齐全；两行为 `disabled`；`wiring-lsp-typescript` 在补齐 TS 前置后 active | 通过 |
 
 打包清单（修复后）：
 
@@ -72,7 +73,7 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 | 行 ID | enabled | fiberPhase |
 |---|---|---|
 | `wiring-lsp` | true | active |
-| `wiring-lsp-typescript` | true | 非 active（缺 `typescript-language-server`） |
+| `wiring-lsp-typescript` | true | active（工作区 `typescript@5` + 全局 language server） |
 | `wiring-lsp-tool` | true | active |
 | `wiring-doctor` | true | active |
 | `wiring-browser-use` | true | active |
@@ -97,11 +98,23 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 
 两处改完后 A 的四条命令仍全绿（engine 11/11、lsp 6/6、browser 5/5、check PASS）。
 
-## 5. 未验证（需人工，且需要新会话）
+## 5. LSP 三种操作（实测）
 
-- LSP 正向跳转：`wiring-lsp-typescript` 未 active，**缺 `typescript-language-server`**；`lsp` 的真实 `goToDefinition` 未验证。
+前置：工作区内 `npm install --save-dev typescript@5`，全局 `typescript-language-server`；`wiring-lsp-typescript` 转为 `active` 后新开会话。
+
+| 操作 | 期望 | 实际 | 结论 |
+|---|---|---|---|
+| 定义跳转 | 返回目标文件与行号 | 返回同文件内的定义位置 | 通过 |
+| 悬停 | 返回符号类型/签名 | 返回类型信息文本 | 通过 |
+| 引用查找 | 返回引用列表 | 返回调用点列表 | 通过 |
+
+说明：TypeScript **7 不兼容**（缺 `lib/tsserver.js`，`lsp` 报 `Could not find a valid TypeScript installation`）；`lsp_status` 只查二进制，不查工作区 typescript，因此可能出现「status ready 但 lsp 失败」。证据原文未随本轮材料提供，此处记录结论级结果。
+
+## 6. 未验证（需人工，且需要新会话）
+
 - webhook 的 401 / 202 与「202 是否真的建了会话」：入口行默认 disabled，未配置 secret。
 - 启用 `wiring-browser-playwright` 后的真实浏览器工具调用（打开页面、截图）。
 - 卸载洁净度：卸载 bundle / 移除行后工具消失、profile 的 patch 未被本包改写。
+- TypeScript 7 兼容性：已判定**不支持**，未尝试绕过。
 
-Step 3 落地；Step 4 记录 tarball 安装实测结果。
+Step 3 落地；Step 4 记录 tarball 安装实测；Step 5 记录 LSP 三种操作与 TS 前置。

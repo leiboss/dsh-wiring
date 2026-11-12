@@ -20,6 +20,10 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 # 重启该 profile；bundle patch 在下次启动时生效
 ```
 
+**前置：TypeScript（仅 LSP 需要）**——`dsh-lsp-stdio` 通过 tsserver 工作，tsserver 只从工作区解析。请在会话工作区内执行 `npm install --save-dev typescript@5`，并全局安装 `typescript-language-server`。只装全局 typescript 不够（`Could not find a valid TypeScript installation`）；TypeScript 7 不含 `lib/tsserver.js`，不支持。
+
+**两种受支持方式**见 [docs/INSTALL.md](docs/INSTALL.md)：方式 A 是 tarball（推荐），方式 B 是先显式安装 7 个官方依赖再装目录。
+
 **目录安装不被直接支持**：`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会以 `ERR_MODULE_NOT_FOUND` 失败。请用 tarball，或先按 [docs/INSTALL.md](docs/INSTALL.md) 的方式 B 显式安装依赖再装目录。
 
 当前包名是 `@local/dsh-wiring`（`private: true`，仅 GitHub 分发）；改到真实 npm 作用域的步骤见 [docs/RELEASE.md](docs/RELEASE.md)。

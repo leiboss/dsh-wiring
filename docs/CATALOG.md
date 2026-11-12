@@ -1,4 +1,4 @@
-Status: ready to submit — install verified in a local profile; LSP happy path requires a language server.
+Status: ready to submit — install verified (tarball) and LSP navigation verified; webhook ingress and browser provider remain opt-in.
 
 # Catalog submission material
 
