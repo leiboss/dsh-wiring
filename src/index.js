@@ -8,6 +8,7 @@
  */
 
 import { existsSync } from 'node:fs'
+import { capability as browser } from './capabilities/browser.js'
 import { capability as lsp } from './capabilities/lsp.js'
 
 const DEFAULT_TIMEOUT_MS = 1500
@@ -15,7 +16,7 @@ const MAX_DETAIL_CHARS = 160
 const TIMEOUT = Symbol('timeout')
 
 /** Every capability this bundle wires. Add a module here to extend the set. */
-const capabilities = [lsp]
+const capabilities = [lsp, browser]
 
 export const name = 'wiring'
 export const inject = ['subprocess', 'tools']
@@ -24,9 +25,10 @@ export const inject = ['subprocess', 'tools']
  * @typedef {object} Check
  * @property {string} id Stable report key.
  * @property {string} label Human-readable label.
- * @property {'command'|'path'|'service'} kind Probe strategy.
+ * @property {'command'|'path'|'paths'|'service'} kind Probe strategy.
  * @property {string} [command] Executable to resolve on PATH.
  * @property {string} [path] Absolute path to test for existence.
+ * @property {string[]} [paths] kind=paths: candidate absolute paths; any hit passes.
  * @property {string} [service] Context service name to look up.
  * @property {string} [install] Copy-pasteable install command.
  * @property {string} [hint] Extra non-command guidance.
@@ -76,6 +78,13 @@ async function probe(ctx, check, signal) {
       return existsSync(check.path)
         ? { ok: true, detail: check.path }
         : { ok: false, detail: 'not found on PATH' }
+    case 'paths': {
+      const paths = Array.isArray(check.paths) ? check.paths : []
+      const found = paths.find((candidate) => existsSync(candidate))
+      return found === undefined
+        ? { ok: false, detail: 'not found' }
+        : { ok: true, detail: found }
+    }
     case 'command': {
       const resolved = await ctx.subprocess.resolveExecutable(check.command, undefined, signal)
       return { ok: true, detail: resolved }
@@ -137,6 +146,7 @@ function buildReport(capability, results) {
     capability: capability.id,
     ok: results.every((result) => result.ok),
     checks: results,
+    hint: capability.hint ?? '',
     next: firstFailure === undefined ? '' : firstFailure.install,
   }
 }
@@ -155,6 +165,8 @@ export function formatReport(capability, report) {
     if (!check.ok && check.install) lines.push(`  install: ${check.install}`)
   }
   if (!report.ok && report.next) lines.push(`next: ${report.next}`)
+  const hint = (report.hint ?? '').trim()
+  if (hint !== '') lines.push('', hint)
   return lines.join('\n')
 }
 
@@ -180,8 +192,9 @@ const OUTPUT_SCHEMA = {
       },
     },
     next: { type: 'string' },
+    hint: { type: 'string' },
   },
-  required: ['capability', 'ok', 'checks', 'next'],
+  required: ['capability', 'ok', 'checks', 'next', 'hint'],
   additionalProperties: false,
 }
 
@@ -218,7 +231,13 @@ export function defineStatusTool(ctx, capability, options = {}) {
         const results = await runChecks(ctx, capability.checks, { timeoutMs })
         return buildReport(capability, results)
       } catch {
-        return { capability: capability.id, ok: false, checks: [], next: '' }
+        return {
+          capability: capability.id,
+          ok: false,
+          checks: [],
+          next: '',
+          hint: capability.hint ?? '',
+        }
       }
     },
   }

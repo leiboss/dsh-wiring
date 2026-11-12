@@ -1,4 +1,7 @@
 {
   "meta": { "title": "接线", "description": "接通已发布但未挂载的能力，并说明缺少什么。" },
-  "capabilities": { "lsp": { "title": "语言服务器" } }
+  "capabilities": {
+    "lsp": { "title": "语言服务器" },
+    "browser": { "title": "浏览器" }
+  }
 }

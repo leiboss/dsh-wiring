@@ -128,6 +128,56 @@ plugin_manager listConfigs
 
 ---
 
+## 9. Browser：安装后诊断
+
+**操作**：调用 `browser_status`。
+
+**期望**：报告 `browser-use seam` 与 `Chromium-family browser` 两项；缺少浏览器时 `install` 为 `npx playwright install chromium`，并附带「默认关闭、启用后需新开会话」的 hint。
+
+**证据**：`browser_status` 的完整文本输出。
+
+---
+
+## 10. Browser：默认关闭不影响新建会话（最重要）
+
+**操作**：不启用 `wiring-browser-playwright`，直接新建一个会话。
+
+**期望**：会话正常创建，与未安装本包时一致；工具列表中没有 `mcp__playwright-mcp__*`。
+
+**证据**：新建会话成功 + `Tool.listTools` 输出。
+
+---
+
+## 11. Browser：启用后新开会话出现 Playwright 工具
+
+**操作**：`plugin_manager set_plugin` 启用 `include:wiring-browser-playwright`，重启 profile，**新建**会话（已存在的会话不会被接管），再调用 `Tool.listTools`。
+
+**期望**：出现一组 `mcp__playwright-mcp__*` 工具。
+
+**证据**：启用记录、重启日志、新会话的 `Tool.listTools` 输出。
+
+---
+
+## 12. Browser：真实打开页面并截图
+
+**操作**：在新会话中让模型打开 `https://example.com` 并截图。
+
+**期望**：工具返回成功，结果中包含一张图片；页面对应 example.com。
+
+**证据**：工具调用结果与截图。
+
+---
+
+## 13. Browser：失败演练
+
+**操作**：把 `wiring-browser-playwright` 的 `config.executablePath` 指向一个不存在的文件，重启后新建会话。
+
+**期望**：新建会话被拒绝，错误信息指向浏览器/可执行文件，而不是静默降级。随后还原 `executablePath` 并新开会话恢复正常。
+
+**证据**：拒绝创建的报错文本；还原后新建会话成功的记录。
+
+---
+
 ## 失败时的定位顺序
 
 1. 第 2 步没有 `@deepseek-ai/dsh-lsp-stdio` → patch 没被应用，检查 `dsh.bundle.patch` 与 profile 的 bundle 顺序。

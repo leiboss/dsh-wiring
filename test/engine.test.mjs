@@ -1,9 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { apply, defineStatusTool, formatReport, runChecks } from '../src/index.js'
+import { capability as lsp } from '../src/capabilities/lsp.js'
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 /**
  * Minimal Cordis-shaped context: tool registration is collected, effects run
@@ -63,7 +66,7 @@ test('R1 apply() performs no probes', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
   assert.equal(harness.calls.length, 0)
-  assert.deepEqual([...harness.registered.keys()], ['lsp_status'])
+  assert.deepEqual([...harness.registered.keys()], ['lsp_status', 'browser_status'])
 })
 
 test('R2 a hung probe times out without affecting siblings', async () => {
@@ -96,16 +99,16 @@ test('R3 a throwing resolver still yields a complete report', async () => {
   assert.equal(report.checks[1].ok, true)
 })
 
-test('R4 disposal followed by apply() leaves exactly one registration', () => {
+test('R4 disposal followed by apply() leaves exactly one registration per capability', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
-  assert.equal(harness.registered.size, 1)
+  assert.equal(harness.registered.size, 2)
 
   harness.disposeAll()
   assert.equal(harness.registered.size, 0)
 
   apply(harness.ctx)
-  assert.equal(harness.registered.size, 1)
+  assert.equal(harness.registered.size, 2)
 })
 
 test('R7 a missing seam service degrades instead of throwing', async () => {
@@ -172,6 +175,59 @@ test('formatReport lists every label and failing install command', () => {
 test('runChecks tolerates a non-array check list', async () => {
   const harness = makeContext({ resolve: okResolver })
   assert.deepEqual(await runChecks(harness.ctx, undefined, { timeoutMs: 10 }), [])
+})
+
+test('paths checks pass on any candidate and report the first hit', async () => {
+  const harness = makeContext({ resolve: okResolver })
+  const present = {
+    ...demo,
+    checks: [
+      {
+        id: 'runtime',
+        label: 'Runtime',
+        kind: 'paths',
+        paths: [join(root, 'definitely-missing'), process.execPath],
+        install: '',
+      },
+    ],
+  }
+  const hitReport = await defineStatusTool(harness.ctx, present, { timeoutMs: 50 }).execute({}, {})
+  assert.equal(hitReport.checks[0].ok, true)
+  assert.equal(hitReport.checks[0].detail, process.execPath)
+
+  const absent = {
+    ...demo,
+    checks: [
+      {
+        id: 'runtime',
+        label: 'Runtime',
+        kind: 'paths',
+        paths: [join(root, 'definitely-missing-a'), join(root, 'definitely-missing-b')],
+        install: '',
+      },
+    ],
+  }
+  const missReport = await defineStatusTool(harness.ctx, absent, { timeoutMs: 50 }).execute({}, {})
+  assert.equal(missReport.checks[0].ok, false)
+  assert.equal(missReport.checks[0].detail, 'not found')
+})
+
+test('hint is carried in the report and rendered only when present', async () => {
+  const harness = makeContext({ resolve: okResolver, services: { fast: {} } })
+  const hintText = 'Enable the provider row and start a new Session.'
+  const hinted = { ...demo, hint: hintText }
+  const report = await defineStatusTool(harness.ctx, hinted, { timeoutMs: 50 }).execute({}, {})
+
+  assert.equal(report.hint, hintText)
+  assert.deepEqual(Object.keys(report).sort(), ['capability', 'checks', 'hint', 'next', 'ok'])
+  const hintedText = formatReport(hinted, report)
+  assert.ok(hintedText.endsWith(`\n\n${hintText}`))
+
+  const plain = await defineStatusTool(harness.ctx, lsp, { timeoutMs: 50 }).execute({}, {})
+  assert.equal(plain.hint, '')
+  const plainText = formatReport(lsp, plain)
+  assert.ok(!plainText.includes('\n\n'))
+  assert.ok(!plainText.endsWith('\n'))
 })
 
 /** Try the local install, then the Windows global DSH layout. */

@@ -8,6 +8,10 @@
 # a single bad entry rolls back every provider registered by that instance. Two
 # languages in one row would therefore take each other down; separate rows fail
 # independently.
+#
+# The browser provider row ships disabled: a startup failure rejects Session
+# creation, so enabling it is an explicit opt-in; an enabled provider never
+# adopts an existing Session — start a new one.
 
 - insert:
     - id: wiring-lsp
@@ -35,6 +39,16 @@
 
     - id: wiring-doctor
       name: '@local/dsh-wiring'
+
+    - id: wiring-browser-use
+      name: '@deepseek-ai/dsh-browser-use'
+
+    - id: wiring-browser-playwright
+      name: '@deepseek-ai/dsh-experimental-browser-use-playwright-mcp'
+      disabled: true
+      config:
+        mode: launch
+        headless: true
 
     # ── Optional languages: copy one block at a time ─────────────────────────
     #

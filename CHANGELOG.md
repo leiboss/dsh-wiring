@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- 新增 browser 能力：挂载 `@deepseek-ai/dsh-browser-use` 与 Playwright MCP provider，并提供只读的 `browser_status`。
+- 引擎新增 `paths` 检查（任一候选存在即通过）与报告 `hint` 字段；LSP 输出保持不变。
+- provider 行默认 `disabled: true`，并新增会话安全断言，保证危险能力必须显式开启。
+
 ## 0.1.1
 
 - Pin the three official LSP packages to the host version line (`0.2.2-rc.1`); the `latest` dist-tag is stale and its peers cannot resolve on a 0.2.2 host.

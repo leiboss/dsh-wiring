@@ -64,6 +64,21 @@ const source = srcFiles.map((file) => readFileSync(file, 'utf8')).join('\n')
 // 2. locales -------------------------------------------------------------------
 {
   const problems = []
+  const capabilityDir = join(root, 'src', 'capabilities')
+  const capabilityFiles = existsSync(capabilityDir)
+    ? readdirSync(capabilityDir).filter((file) => file.endsWith('.js'))
+    : []
+  const ids = []
+  for (const file of capabilityFiles) {
+    try {
+      const module = await import(pathToFileURL(join(capabilityDir, file)).href)
+      if (typeof module.capability?.id === 'string') ids.push(module.capability.id)
+      else problems.push(`${file} exports no capability`)
+    } catch (error) {
+      problems.push(`${file}: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
   for (const locale of ['en', 'zh']) {
     try {
       const parsed = JSON.parse(read(`locale/${locale}.json`))
@@ -73,8 +88,11 @@ const source = srcFiles.map((file) => readFileSync(file, 'utf8')).join('\n')
       if (typeof parsed.meta?.description !== 'string' || parsed.meta.description.trim() === '') {
         problems.push(`${locale}: meta.description is empty`)
       }
-      if (typeof parsed.capabilities?.lsp?.title !== 'string' || parsed.capabilities.lsp.title.trim() === '') {
-        problems.push(`${locale}: capabilities.lsp.title is empty`)
+      for (const id of ids) {
+        const title = parsed.capabilities?.[id]?.title
+        if (typeof title !== 'string' || title.trim() === '') {
+          problems.push(`${locale}: capabilities.${id}.title is empty`)
+        }
       }
     } catch (error) {
       problems.push(`${locale}: ${error instanceof Error ? error.message : String(error)}`)
@@ -151,7 +169,7 @@ let patchText = ''
   check('R5 source writes', hits.length === 0, `forbidden token(s): ${hits.join(', ')}`)
 }
 
-// 6. R6: no host imports and only the three pinned dependencies ---------------
+// 6. R6: no host imports and only the five pinned dependencies ---------------
 {
   const problems = []
   const importPattern = /(?:from\s+['"]@deepseek-ai\/|import\(\s*['"]@deepseek-ai\/)/
@@ -161,6 +179,8 @@ let patchText = ''
   }
 
   const allowed = [
+    '@deepseek-ai/dsh-browser-use',
+    '@deepseek-ai/dsh-experimental-browser-use-playwright-mcp',
     '@deepseek-ai/dsh-lsp',
     '@deepseek-ai/dsh-lsp-stdio',
     '@deepseek-ai/dsh-tool-lsp',

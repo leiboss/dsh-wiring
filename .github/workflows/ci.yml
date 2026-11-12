@@ -23,3 +23,5 @@ jobs:
         run: node test/engine.test.mjs
       - name: LSP tests
         run: node test/lsp.test.mjs
+      - name: Browser tests
+        run: node test/browser.test.mjs

@@ -7,6 +7,7 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 | 能力 | 状态 | 模型工具 | 诊断工具 |
 |---|---|---|---|
 | LSP（TypeScript 一个语言服务器） | 已接线 | `lsp` | `lsp_status` |
+| Browser（Playwright，provider 默认关闭） | 已接线 | `mcp__playwright-mcp__*` | `browser_status` |
 
 安装（在 DSH 会话内执行，路径必须是绝对路径）：
 
@@ -33,6 +34,10 @@ plugin_manager  action: install_bundle  target: "/absolute/path/to/dsh-wiring"
 - 不做 UI、不做配置页、不自动安装语言服务器。
 - 不覆盖用户自己的 patch 行；所有行 id 都以 `wiring-` 开头。
 - 不内置浏览器、webhook、TTS（见 DESIGN.md 的 Step 2/3/4）。
+
+## 为什么 browser 默认关闭
+
+`@deepseek-ai/dsh-experimental-browser-use-playwright-mcp` 在会话创建之前初始化，启动失败会直接拒绝创建或恢复会话。所以 `wiring-browser-playwright` 行带 `disabled: true`：默认安装不影响任何现有工作流。启用它是一次显式选择；启用后必须新开会话，已加载的 provider 不会接管已存在的会话。`browser_status` 会报告 seam 与 Chromium 候选，失败时给出 `npx playwright install chromium`。
 
 ## 结构
 
