@@ -6,7 +6,7 @@
 前置：
 
 - DSH 0.2.2-rc.1，profile 已能正常启动。
-- 本仓库位于 `/absolute/path/to/dsh-wiring`（下称 `<bundle>`）。
+- 本仓库根目录就是 bundle（下称 `<bundle>`，例如 `/absolute/path/to/dsh-wiring`）。
 - 一个含 `.ts` 文件的真实工作区（下称 `<workspace>`）。
 
 ---
