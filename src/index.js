@@ -10,13 +10,14 @@
 import { existsSync } from 'node:fs'
 import { capability as browser } from './capabilities/browser.js'
 import { capability as lsp } from './capabilities/lsp.js'
+import { capability as webhook } from './capabilities/webhook.js'
 
 const DEFAULT_TIMEOUT_MS = 1500
 const MAX_DETAIL_CHARS = 160
 const TIMEOUT = Symbol('timeout')
 
 /** Every capability this bundle wires. Add a module here to extend the set. */
-const capabilities = [lsp, browser]
+const capabilities = [lsp, browser, webhook]
 
 export const name = 'wiring'
 export const inject = ['subprocess', 'tools']

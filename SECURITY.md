@@ -24,6 +24,10 @@ DSH bundle 是进程内插件：`apply()` 与 `lsp_status` 都运行在宿主 No
 
 `lsp` 工具的实际行为由官方 `@deepseek-ai/dsh-lsp-stdio` 决定：它会启动配置中的语言服务器进程，信任该进程，并且不提供额外的进程沙箱。部署方需要自行确保 `command` 指向可信的可执行文件，并保证文件系统与子进程 provider 属于同一个执行世界。
 
+## Webhook 入口
+
+`wiring-webhook-github` 必须置于 TLS 反向代理之后：它自身只做 `X-Hub-Signature-256` 验签，不提供 TLS。webhook secret 走凭据记录（键名与 `secretEnv` 一致，默认 `GITHUB_WEBHOOK_SECRET`），不要写进明文配置。签名校验失败返回 **401**，请求不落库、不创建会话。规则收到的 payload 一律视为不可信数据；`prompt` 中已显式标注，但部署方仍应限制 `permissionPreset`。
+
 ## 报告
 
 发现安全问题请勿公开提 issue，请私下联系维护者并附上复现步骤与影响范围。

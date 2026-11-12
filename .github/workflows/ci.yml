@@ -25,3 +25,5 @@ jobs:
         run: node test/lsp.test.mjs
       - name: Browser tests
         run: node test/browser.test.mjs
+      - name: Webhook tests
+        run: node test/webhook.test.mjs

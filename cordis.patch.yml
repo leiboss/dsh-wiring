@@ -12,6 +12,9 @@
 # The browser provider row ships disabled: a startup failure rejects Session
 # creation, so enabling it is an explicit opt-in; an enabled provider never
 # adopts an existing Session — start a new one.
+#
+# Only the webhook ingress row ships disabled: it needs a webhook secret and
+# must sit behind TLS. `workspacePath: ''` means the host working directory.
 
 - insert:
     - id: wiring-lsp
@@ -49,6 +52,26 @@
       config:
         mode: launch
         headless: true
+
+    - id: wiring-webhook-runtime
+      name: '@deepseek-ai/dsh-webhook'
+
+    - id: wiring-webhook-rule
+      name: '@local/dsh-wiring/rule'
+      config:
+        workspacePath: ''
+        agentPreset: standard
+        permissionPreset: workspace-write
+        events: ['opened', 'synchronize', 'reopened']
+
+    - id: wiring-webhook-github
+      name: '@deepseek-ai/dsh-webhook-github'
+      disabled: true
+      config:
+        source: primary-github
+        path: /webhook/github
+        secretEnv: GITHUB_WEBHOOK_SECRET
+        maxBodyBytes: 1048576
 
     # ── Optional languages: copy one block at a time ─────────────────────────
     #

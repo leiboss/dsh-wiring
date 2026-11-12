@@ -178,6 +178,67 @@ plugin_manager listConfigs
 
 ---
 
+## 14. Webhook：安装后诊断
+
+**操作**：调用 `webhook_status`。
+
+**期望**：报告 `webhook runtime` 一项为 mounted（seam `webhookRuntime` 存在）。若未挂载，说明 `wiring-webhook-runtime` 行未激活。
+
+**证据**：`webhook_status` 的完整文本输出。
+
+---
+
+## 15. Webhook：入口默认关闭且不影响 UI
+
+**操作**：不启用 `wiring-webhook-github`，重启 profile，打开 UI 并新建会话。
+
+**期望**：`plugin_manager list_plugins` 中 `wiring-webhook-runtime`、`wiring-webhook-rule` 为 active，`wiring-webhook-github` 为 disabled；UI 正常打开，没有监听端口，也没有 401/503 之类的入口错误。
+
+**证据**：`list_plugins` 中三行的 `enabled` / `fiberPhase`；UI 截图。
+
+---
+
+## 16. Webhook：错误签名返回 401
+
+**操作**：把 secret 存成凭据记录（键 `GITHUB_WEBHOOK_SECRET`），启用 `wiring-webhook-github` 并重启；然后用错误的 secret 构造请求：
+
+```sh
+node scripts/sign.mjs docs/examples/pull_request.json wrong-secret
+# 取输出的 curl.exe 命令执行（目标 http://127.0.0.1:3080/webhook/github）
+```
+
+**期望**：HTTP **401**，不创建会话。可选：缺少凭据记录时应为 **503**，非 JSON body 应为 **415**。
+
+**证据**：HTTP 状态码与会话列表（无新会话）。
+
+---
+
+## 17. Webhook：正确签名 → 202 且出现新会话
+
+**操作**：用真实 secret 重跑：
+
+```sh
+node scripts/sign.mjs docs/examples/pull_request.json "$GITHUB_WEBHOOK_SECRET"
+```
+
+执行输出的 curl.exe 命令。
+
+**期望**：HTTP **202**（只代表已验签并派发），随后出现一个**新会话**，标题形如 `PR #42: Add the widget`，prompt 内含「untrusted data」提示与 payload 的 JSON 块。
+
+**证据**：202 响应；新会话标题与首条消息。
+
+---
+
+## 18. Webhook：`action: closed` 不建会话
+
+**操作**：复制 `docs/examples/pull_request.json`，把 `action` 改成 `closed`，用正确签名再发一次。
+
+**期望**：HTTP **202**，但**没有**新会话——这验证的是规则过滤，而不是 202 语义。
+
+**证据**：202 响应 + 会话列表无新增。
+
+---
+
 ## 失败时的定位顺序
 
 1. 第 2 步没有 `@deepseek-ai/dsh-lsp-stdio` → patch 没被应用，检查 `dsh.bundle.patch` 与 profile 的 bundle 顺序。

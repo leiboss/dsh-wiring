@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- 新增 webhook 能力：挂载 `@deepseek-ai/dsh-webhook` 运行时、一个 `pull_request` 规则子路径行，以及默认禁用的签名 GitHub 入口。
+- 规则把 PR 元数据作为不可信数据处理，并固定 `agentPreset` / `permissionPreset` 默认值。
+- 入口行默认 `disabled: true`（需要 secret 与 TLS 反代），并新增会话/入口安全断言。
+
 ## 0.2.0
 
 - 新增 browser 能力：挂载 `@deepseek-ai/dsh-browser-use` 与 Playwright MCP provider，并提供只读的 `browser_status`。

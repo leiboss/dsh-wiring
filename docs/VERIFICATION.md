@@ -100,3 +100,5 @@ src/index.js
 - 启用 `wiring-browser-playwright` 后 `mcp__playwright-mcp__*` 的真实浏览器调用（打开页面、截图）。
 - 卸载洁净度：卸载 bundle / 移除行后工具消失、profile 的 patch 未被本包改写。
 - 可选演练（E 节）未执行：本环境无 `dsh` CLI，且属共享环境，不做二进制改名演练。
+
+Step 3 落地，安装验收仍未执行。

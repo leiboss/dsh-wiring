@@ -169,7 +169,7 @@ let patchText = ''
   check('R5 source writes', hits.length === 0, `forbidden token(s): ${hits.join(', ')}`)
 }
 
-// 6. R6: no host imports and only the five pinned dependencies ---------------
+// 6. R6: no host imports and only the seven pinned dependencies ---------------
 {
   const problems = []
   const importPattern = /(?:from\s+['"]@deepseek-ai\/|import\(\s*['"]@deepseek-ai\/)/
@@ -184,6 +184,8 @@ let patchText = ''
     '@deepseek-ai/dsh-lsp',
     '@deepseek-ai/dsh-lsp-stdio',
     '@deepseek-ai/dsh-tool-lsp',
+    '@deepseek-ai/dsh-webhook',
+    '@deepseek-ai/dsh-webhook-github',
   ]
   const declared = Object.keys(pkg.dependencies ?? {})
   if (declared.length !== allowed.length) problems.push(`dependencies must be exactly ${allowed.join(', ')}`)

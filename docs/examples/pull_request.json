@@ -1,0 +1,13 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 42,
+    "title": "Add the widget",
+    "html_url": "https://github.com/example/repo/pull/42",
+    "body": "Please review this change.",
+    "user": { "login": "octocat" },
+    "base": { "ref": "main" },
+    "head": { "ref": "widget" }
+  },
+  "repository": { "full_name": "example/repo" }
+}

@@ -66,7 +66,7 @@ test('R1 apply() performs no probes', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
   assert.equal(harness.calls.length, 0)
-  assert.deepEqual([...harness.registered.keys()], ['lsp_status', 'browser_status'])
+  assert.deepEqual([...harness.registered.keys()], ['lsp_status', 'browser_status', 'webhook_status'])
 })
 
 test('R2 a hung probe times out without affecting siblings', async () => {
@@ -102,13 +102,13 @@ test('R3 a throwing resolver still yields a complete report', async () => {
 test('R4 disposal followed by apply() leaves exactly one registration per capability', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
-  assert.equal(harness.registered.size, 2)
+  assert.equal(harness.registered.size, 3)
 
   harness.disposeAll()
   assert.equal(harness.registered.size, 0)
 
   apply(harness.ctx)
-  assert.equal(harness.registered.size, 2)
+  assert.equal(harness.registered.size, 3)
 })
 
 test('R7 a missing seam service degrades instead of throwing', async () => {
