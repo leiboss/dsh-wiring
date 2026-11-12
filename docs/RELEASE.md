@@ -9,20 +9,22 @@
 
 ## 发布前检查单
 
-1. 五组测试全绿：
+1. 六组测试全绿（**在 Windows 与 Linux 都要跑**，CI 矩阵已覆盖两个平台）：
 
    ```sh
    node test/engine.test.mjs
    node test/lsp.test.mjs
    node test/browser.test.mjs
    node test/webhook.test.mjs
+   node test/rename-scope.test.mjs
    node scripts/check.mjs
    ```
 
 2. `npm pack --dry-run --json`：确认 `cordis.patch.yml`、`src/**`、`locale/**`、`docs/VERIFY.md`、`docs/VERIFICATION.md`、`README.md`、`LICENSE` 在清单里，且不含 `test/`、`scripts/`。
 3. 安装验收：按 [VERIFY.md](VERIFY.md) 执行，并在 [VERIFICATION.md](VERIFICATION.md) 记录结果。
-   **当前状态：安装验收未执行**（无 DSH 会话/CLI），因此本仓库尚不具备打 tag 的条件。
-4. 只有前三项都完成后才允许 `git tag`。tag 与 npm 发布由人工执行。
+   **当前状态：安装（tarball）与 LSP 三种操作已验证，见 [VERIFICATION.md](VERIFICATION.md)；webhook 入口与浏览器工具仍未验证（两者默认关闭）。**
+4. `node scripts/rename-scope.mjs --scope <真实作用域>` 的 dry-run 不得包含 `docs/VERIFICATION.md`（归档不改名）。
+5. 只有前四项都完成后才允许 `git tag`。tag 与 npm 发布由人工执行。
 
 ## 两种发布形态
 
