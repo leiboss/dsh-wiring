@@ -199,7 +199,19 @@ let patchText = ''
   check('no host imports', problems.length === 0, problems.join('; '))
 }
 
-// 7. dangerous blast radii are opt-in ----------------------------------------
+// 7. no stale scope: the module name must match the published package ---------
+{
+  const problems = []
+  for (const file of srcFiles) {
+    const lines = readFileSync(file, 'utf8').split('\n')
+    lines.forEach((line, index) => {
+      if (line.includes('@local/')) problems.push(`${file.slice(root.length + 1)}:${index + 1}`)
+    })
+  }
+  check('no stale scope', problems.length === 0, problems.join('; '))
+}
+
+// 8. dangerous blast radii are opt-in ----------------------------------------
 {
   const problems = []
   const capabilityDir = join(root, 'src', 'capabilities')

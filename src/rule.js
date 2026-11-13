@@ -1,7 +1,7 @@
 /**
- * The pull_request rule. Mounted as the `@local/dsh-wiring/rule` subpath row so
+ * The pull_request rule. Mounted as the `@leiboss/dsh-wiring/rule` subpath row so
  * it can wait for `webhookRuntime` without making the doctor depend on it.
- * @module @local/dsh-wiring/rule
+ * @module @leiboss/dsh-wiring/rule
  */
 
 const UNTRUSTED =
@@ -12,7 +12,7 @@ function text(value, limit = 400) {
   return typeof value === 'string' ? value.slice(0, limit) : ''
 }
 
-export const name = '@local/dsh-wiring/rule'
+export const name = '@leiboss/dsh-wiring/rule'
 export const inject = ['webhookRuntime']
 
 export function apply(ctx, config = {}) {

@@ -76,7 +76,23 @@ export function planRename(root, scope) {
       plan.push(...collect(root, join('docs', entry), renameMarkdown, from, target))
     }
   }
+  for (const file of walkSources(root, 'src')) {
+    plan.push(...collect(root, file, renameMarkdown, from, target))
+  }
   return plan
+}
+
+/** Recursively list `.js` files under `dir`, as relative POSIX paths. */
+function walkSources(root, dir) {
+  const base = join(root, dir)
+  if (!existsSync(base)) return []
+  const files = []
+  for (const entry of readdirSync(base, { withFileTypes: true })) {
+    const id = join(dir, entry.name)
+    if (entry.isDirectory()) files.push(...walkSources(root, id))
+    else if (entry.name.endsWith('.js')) files.push(toPosix(id))
+  }
+  return files
 }
 
 const TRANSFORMS = {

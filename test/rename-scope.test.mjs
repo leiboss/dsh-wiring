@@ -18,10 +18,10 @@ test('the current scope is a no-op', () => {
   assert.deepEqual(planRename(root, currentScope), [])
 })
 
-test('the plan covers package.json, the patch, and the README', () => {
+test('the plan covers package.json, the patch, the README, and the sources', () => {
   const plan = planRename(root, 'example')
   const files = new Set(plan.map((change) => change.file))
-  for (const file of ['package.json', 'cordis.patch.yml', 'README.md']) {
+  for (const file of ['package.json', 'cordis.patch.yml', 'README.md', 'src/rule.js']) {
     assert.equal(files.has(file), true, `${file} is missing from the plan`)
   }
   for (const change of plan) {
@@ -33,6 +33,6 @@ test('every planned path is relative and POSIX-shaped', () => {
   for (const change of planRename(root, 'example')) {
     assert.match(change.file, /^[^\\/]/)
     assert.equal(change.file.includes('\\'), false)
-    assert.match(change.file, /^(package\.json|cordis\.patch\.yml|README\.md|docs\/[^\\/]+\.md)$/)
+    assert.match(change.file, /^(package\.json|cordis\.patch\.yml|README\.md|docs\/[^\\/]+\.md|src\/[^\\]+\.js)$/)
   }
 })
