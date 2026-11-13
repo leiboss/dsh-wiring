@@ -95,6 +95,37 @@ test('non-matching deliveries are ignored', () => {
   assert.equal(rules[0].run(delivery('opened'), { aborted: true }), null)
 })
 
+test('a repeated deliveryId is dropped', () => {
+  const { rules, ctx } = makeContext()
+  apply(ctx)
+
+  assert.ok(rules[0].run(delivery('opened'), signal))
+  assert.equal(rules[0].run(delivery('opened'), signal), null)
+})
+
+test('distinct deliveryIds each produce a request', () => {
+  const { rules, ctx } = makeContext()
+  apply(ctx)
+
+  const first = delivery('opened')
+  const second = delivery('opened')
+  second.deliveryId = 'delivery-2'
+
+  assert.ok(rules[0].run(first, signal))
+  assert.ok(rules[0].run(second, signal))
+})
+
+test('a delivery without an id is never treated as a duplicate', () => {
+  const { rules, ctx } = makeContext()
+  apply(ctx)
+
+  const anonymous = delivery('opened')
+  delete anonymous.deliveryId
+
+  assert.ok(rules[0].run(anonymous, signal))
+  assert.ok(rules[0].run(anonymous, signal))
+})
+
 test('Ingress safety: only the signed ingress row ships disabled', () => {
   const text = readFileSync(join(root, 'cordis.patch.yml'), 'utf8').replace(/\r\n?/g, '\n')
   const lines = text.split('\n')

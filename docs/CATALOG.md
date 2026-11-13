@@ -30,7 +30,7 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 ## 安装
 
 ```text
-# 推荐：按包名安装（发布后可用）
+# 推荐：按包名安装
 plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
 ```
 
@@ -68,7 +68,7 @@ https://github.com/leiboss/dsh-wiring
 #### 安装
 
 ```text
-# 推荐：按包名安装（发布后可用）
+# 推荐：按包名安装
 plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
 ```
 

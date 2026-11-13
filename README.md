@@ -59,7 +59,19 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiri
 
 ## 为什么 webhook 入口默认关闭
 
-签名入口需要两样默认不存在的东西：一个 webhook secret，以及一层 TLS 反向代理。所以 `wiring-webhook-github` 行带 `disabled: true`，而运行时与 `pull_request` 规则照常挂载（它们不监听端口）。启用入口前请把 secret 存成凭据记录（键名与 `secretEnv` 一致），并确保 `/webhook/github` 不经代理不可从公网到达。另外，适配器返回 **202 只代表「已验签并派发」**，不代表已经创建了会话——会话是否出现要看新会话列表。
+签名入口需要两样默认不存在的东西：一个 webhook secret，以及一层 TLS 反向代理。所以 `wiring-webhook-github` 行带 `disabled: true`，而运行时与 `pull_request` 规则照常挂载（它们不监听端口）。启用入口前请把 secret 存成凭据记录（键名与 `secretEnv` 一致），并确保 `/webhook/github` 不经代理不可从公网到达。另外，适配器返回 **202 只代表「已验签并派发」**，不代表已经创建了会话——会话是否出现要看新会话列表。重复投递按 `deliveryId` 静默丢弃（10 分钟窗口）。
+
+## 适合用它
+
+- 想用**官方包**、不想引入重写工具面的 LSP/浏览器/webhook 实现；
+- 想要「装完就知道缺什么」：三个 `<capability>_status` 直接给修复命令；
+- 团队/共享机器：危险能力默认关闭，不会因为没装浏览器就建不了会话。
+
+## 不适合
+
+- 想要 LSP 的补全 / 格式化 / 重命名（本包只挂官方 4 个只读操作，这类需求看 `dsh-lsp-actions`）；
+- 需要持久化、可重放的 webhook 队列（官方 runtime 是 fire-and-forget）；
+- 想开箱即用浏览器、不关心默认关闭策略。
 
 ## 结构
 

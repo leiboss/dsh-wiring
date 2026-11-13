@@ -24,12 +24,33 @@ export function apply(ctx, config = {}) {
       ? config.events
       : ['opened', 'synchronize', 'reopened'],
   )
+  const seen = new Map()
+  const TTL_MS = 10 * 60 * 1000
+  const MAX_SEEN = 500
+  let writes = 0
+
+  function isDuplicate(id) {
+    if (id === undefined || id === null) return false
+    const now = Date.now()
+    const first = seen.get(id)
+    if (first !== undefined && now - first <= TTL_MS) return true
+    // GitHub 会重投；同一个 deliveryId 只建一个会话。
+    seen.set(id, now)
+    writes += 1
+    if (seen.size > MAX_SEEN || writes % 100 === 0) {
+      for (const [key, at] of seen) {
+        if (now - at > TTL_MS) seen.delete(key)
+      }
+    }
+    return false
+  }
 
   const rule = {
     id: 'wiring-github-pr-review',
     kind: 'github',
     run(delivery, signal) {
       if (signal.aborted) return null
+      if (isDuplicate(delivery?.deliveryId)) return null
       const event = delivery?.event
       if (event?.name !== 'pull_request') return null
 

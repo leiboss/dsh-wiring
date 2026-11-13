@@ -23,7 +23,7 @@
 
 ## 3. 引擎契约
 
-- `Check.kind` 四种：`command`（PATH 解析）、`path`（单个绝对路径）、`paths`（候选路径任一命中）、`service`（`ctx.get(name)`）。
+- `Check.kind` 五种：`command`（PATH 解析）、`path`（单个绝对路径）、`paths`（候选路径任一命中）、`workspacePath`（相对会话工作区解析，`/` 分隔）、`service`（`ctx.get(name)`）。
 - 报告固定五个键：`capability` / `ok` / `checks` / `hint` / `next`；`hint` 为空时 `formatReport` 不多输出任何字符。
 - 每个探测有独立超时（默认 1500ms），超时只落入 `detail`，**`execute` 永不 reject**。
 - 不得 `import '@deepseek-ai/*'`；宿主包只通过 patch 行挂载。

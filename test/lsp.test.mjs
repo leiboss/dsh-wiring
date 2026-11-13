@@ -1,5 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { capability } from '../src/capabilities/lsp.js'
 import { defineStatusTool, formatReport } from '../src/index.js'
 
@@ -43,17 +46,29 @@ test('the doctor is named lsp_status with an object parameter root', () => {
   assert.equal(tool.parameters.type, 'object')
 })
 
+test('the descriptor also probes the workspace tsserver', () => {
+  const check = capability.checks.find((entry) => entry.id === 'typescript-lib')
+  assert.equal(check.kind, 'workspacePath')
+  assert.equal(check.path, 'node_modules/typescript/lib/tsserver.js')
+})
+
 test('execute reports ready when both probes pass', async () => {
+  const workspace = mkdtempSync(join(tmpdir(), 'wiring-lsp-'))
+  mkdirSync(join(workspace, 'node_modules', 'typescript', 'lib'), { recursive: true })
+  writeFileSync(join(workspace, 'node_modules', 'typescript', 'lib', 'tsserver.js'), '')
+
   const ctx = makeContext({
     resolve: async () => '/usr/local/bin/typescript-language-server',
     services: lspSeam,
   })
   const tool = defineStatusTool(ctx, capability, { timeoutMs: 50 })
-  const report = await tool.execute({}, {})
+  const report = await tool.execute({}, { agent: { session: { header: { cwd: workspace } } } })
   assert.equal(report.ok, true)
   assert.equal(report.next, '')
   assert.equal(report.capability, 'lsp')
   assert.equal(report.checks[1].detail, '/usr/local/bin/typescript-language-server')
+
+  rmSync(workspace, { recursive: true, force: true })
 })
 
 test('execute reports the install command when the server is missing', async () => {

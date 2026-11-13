@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- `lsp_status` now probes the workspace TypeScript install (`typescript-lib`, resolved against the session working directory), removing the "ready but `lsp` fails to initialize" false positive.
+- The webhook rule drops repeated deliveries by `deliveryId` (10-minute window), so a GitHub replay creates one Session.
+- README gains a "fits / does not fit" section.
+
 ## 0.3.3
 
 - Publish-ready manifest: license, repository, homepage, bugs, keywords, `publishConfig.access`, and a `prepack` check.

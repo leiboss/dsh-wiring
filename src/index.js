@@ -1,6 +1,7 @@
 /** dsh-wiring engine: bounded, read-only probes plus one `<capability>_status` tool per capability. */
 
 import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { capability as browser } from './capabilities/browser.js'
 import { capability as lsp } from './capabilities/lsp.js'
 import { capability as webhook } from './capabilities/webhook.js'
@@ -30,7 +31,7 @@ function isNotFound(error) {
   return error?.name === 'SubprocessExecutableNotFoundError' || error?.code === 'ENOENT'
 }
 
-async function probe(ctx, check, signal) {
+async function probe(ctx, check, signal, cwd) {
   switch (check.kind) {
     case 'service':
       return ctx.get(check.service) === undefined
@@ -47,6 +48,13 @@ async function probe(ctx, check, signal) {
         ? { ok: false, detail: 'not found' }
         : { ok: true, detail: found }
     }
+    case 'workspacePath': {
+      const segments = String(check.path ?? '').split('/')
+      const resolved = join(cwd, ...segments)
+      return existsSync(resolved)
+        ? { ok: true, detail: resolved }
+        : { ok: false, detail: 'not found' }
+    }
     case 'command': {
       const resolved = await ctx.subprocess.resolveExecutable(check.command, undefined, signal)
       return { ok: true, detail: resolved }
@@ -57,7 +65,7 @@ async function probe(ctx, check, signal) {
 }
 
 // never rejects: a failed probe becomes a report row
-async function runCheck(ctx, check, timeoutMs) {
+async function runCheck(ctx, check, timeoutMs, cwd) {
   const controller = new AbortController()
   let timer
   const timeout = new Promise((resolve) => {
@@ -68,7 +76,7 @@ async function runCheck(ctx, check, timeoutMs) {
   })
 
   try {
-    const outcome = await Promise.race([probe(ctx, check, controller.signal), timeout])
+    const outcome = await Promise.race([probe(ctx, check, controller.signal, cwd), timeout])
     if (outcome === TIMEOUT) return resultOf(check, false, 'timeout')
     return resultOf(check, outcome.ok, outcome.detail)
   } catch (error) {
@@ -86,8 +94,9 @@ export async function runChecks(ctx, checks, options = {}) {
     Number.isFinite(options.timeoutMs) && options.timeoutMs > 0
       ? options.timeoutMs
       : DEFAULT_TIMEOUT_MS
+  const cwd = typeof options.cwd === 'string' && options.cwd !== '' ? options.cwd : process.cwd()
   const list = Array.isArray(checks) ? checks : []
-  return Promise.all(list.map((check) => runCheck(ctx, check, timeoutMs)))
+  return Promise.all(list.map((check) => runCheck(ctx, check, timeoutMs, cwd)))
 }
 
 function buildReport(capability, results) {
@@ -163,9 +172,10 @@ export function defineStatusTool(ctx, capability, options = {}) {
         return [{ type: 'text', text: formatReport(capability, value) }]
       },
     },
-    async execute() {
+    async execute(_args, exec) {
+      const cwd = exec?.agent?.session?.header?.cwd ?? process.cwd()
       try {
-        const results = await runChecks(ctx, capability.checks, { timeoutMs })
+        const results = await runChecks(ctx, capability.checks, { timeoutMs, cwd })
         return buildReport(capability, results)
       } catch {
         return {

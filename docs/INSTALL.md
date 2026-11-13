@@ -67,5 +67,5 @@ dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 | `wiring-lsp-typescript` failed | 缺 `typescript-language-server` | `npm install -g typescript-language-server` |
 | `lsp` 报 `Could not find a valid TypeScript installation` | 工作区缺 typescript，或用了 TS 7 | `npm install --save-dev typescript@5` |
 | `lsp` 报 `no LSP provider handles` | 该扩展名没有可用 provider | 先跑 `lsp_status` |
-| `lsp_status` 说 ready 但 `lsp` 仍失败 | 已知局限：doctor 只查二进制，不查工作区 typescript | 按上一行处理 |
+| `lsp_status` 说 ready 但 `lsp` 仍失败 | 0.4.0 起 `lsp_status` 会直接报 `workspace typescript (tsserver)` 缺失（`typescript-lib` 项），不再有这类假阳性 | 按上一行处理 |
 | `browser-playwright` disabled | 启动失败会拒绝建会话 | 先跑 `browser_status`，再按提示启用 |

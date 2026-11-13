@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { apply, defineStatusTool, formatReport, runChecks } from '../src/index.js'
@@ -223,11 +224,74 @@ test('hint is carried in the report and rendered only when present', async () =>
   const hintedText = formatReport(hinted, report)
   assert.ok(hintedText.endsWith(`\n\n${hintText}`))
 
-  const plain = await defineStatusTool(harness.ctx, lsp, { timeoutMs: 50 }).execute({}, {})
+  const plain = await defineStatusTool(harness.ctx, demo, { timeoutMs: 50 }).execute({}, {})
   assert.equal(plain.hint, '')
-  const plainText = formatReport(lsp, plain)
+  const plainText = formatReport(demo, plain)
   assert.ok(!plainText.includes('\n\n'))
   assert.ok(!plainText.endsWith('\n'))
+})
+
+test('workspacePath resolves against the session working directory', async () => {
+  const workspace = mkdtempSync(join(tmpdir(), 'wiring-cwd-'))
+  const nested = join(workspace, 'node_modules', 'typescript', 'lib')
+  mkdirSync(nested, { recursive: true })
+  writeFileSync(join(nested, 'tsserver.js'), '')
+
+  const capability = {
+    ...demo,
+    checks: [
+      {
+        id: 'typescript-lib',
+        label: 'workspace typescript (tsserver)',
+        kind: 'workspacePath',
+        path: 'node_modules/typescript/lib/tsserver.js',
+        install: 'npm install --save-dev typescript@5',
+      },
+    ],
+  }
+  const harness = makeContext({ resolve: okResolver })
+
+  const hit = await runChecks(harness.ctx, capability.checks, { timeoutMs: 50, cwd: workspace })
+  assert.equal(hit[0].ok, true)
+  assert.equal(hit[0].detail, join(workspace, 'node_modules', 'typescript', 'lib', 'tsserver.js'))
+
+  const miss = await runChecks(harness.ctx, capability.checks, { timeoutMs: 50, cwd: tmpdir() })
+  assert.equal(miss[0].ok, false)
+  assert.equal(miss[0].detail, 'not found')
+
+  rmSync(workspace, { recursive: true, force: true })
+})
+
+test('execute reads the working directory from the tool execution context', async () => {
+  const workspace = mkdtempSync(join(tmpdir(), 'wiring-exec-'))
+  const nested = join(workspace, 'node_modules', 'typescript', 'lib')
+  mkdirSync(nested, { recursive: true })
+  writeFileSync(join(nested, 'tsserver.js'), '')
+
+  const capability = {
+    ...demo,
+    checks: [
+      {
+        id: 'typescript-lib',
+        label: 'workspace typescript (tsserver)',
+        kind: 'workspacePath',
+        path: 'node_modules/typescript/lib/tsserver.js',
+        install: 'npm install --save-dev typescript@5',
+      },
+    ],
+  }
+  const harness = makeContext({ resolve: okResolver })
+  const tool = defineStatusTool(harness.ctx, capability, { timeoutMs: 50 })
+
+  const fromAgent = await tool.execute({}, { agent: { session: { header: { cwd: workspace } } } })
+  assert.equal(fromAgent.checks[0].ok, true)
+
+  const fallback = await tool.execute({}, {})
+  const direct = await runChecks(harness.ctx, capability.checks, { timeoutMs: 50, cwd: process.cwd() })
+  assert.equal(fallback.checks[0].ok, direct[0].ok)
+  assert.equal(fallback.checks[0].detail, direct[0].detail)
+
+  rmSync(workspace, { recursive: true, force: true })
 })
 
 /** Try the local install, then the Windows global DSH layout. */
