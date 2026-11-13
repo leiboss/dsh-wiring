@@ -164,14 +164,14 @@ let patchText = ''
   check('cordis.patch.yml', problems.length === 0, problems.join('; '))
 }
 
-// 5. R5: the doctor never writes ----------------------------------------------
+// 5. the doctor never writes --------------------------------------------------
 {
   const forbidden = ['configEditor', 'writeFile', 'appendFile', 'mkdir']
   const hits = forbidden.filter((token) => source.includes(token))
-  check('R5 source writes', hits.length === 0, `forbidden token(s): ${hits.join(', ')}`)
+  check('no source writes', hits.length === 0, `forbidden token(s): ${hits.join(', ')}`)
 }
 
-// 6. R6: no host imports and only the seven pinned dependencies ---------------
+// 6. no host imports and only the seven pinned dependencies -------------------
 {
   const problems = []
   const importPattern = /(?:from\s+['"]@deepseek-ai\/|import\(\s*['"]@deepseek-ai\/)/
@@ -196,10 +196,10 @@ let patchText = ''
   }
   if (Object.keys(pkg.devDependencies ?? {}).length > 0) problems.push('devDependencies must be empty')
 
-  check('R6 boundaries', problems.length === 0, problems.join('; '))
+  check('no host imports', problems.length === 0, problems.join('; '))
 }
 
-// 7. R8: dangerous blast radii are opt-in -------------------------------------
+// 7. dangerous blast radii are opt-in ----------------------------------------
 {
   const problems = []
   const capabilityDir = join(root, 'src', 'capabilities')
@@ -221,7 +221,7 @@ let patchText = ''
     }
   }
 
-  check('R8 blast radius', problems.length === 0, problems.join('; '))
+  check('dangerous capabilities opt-in', problems.length === 0, problems.join('; '))
 }
 
 function finish() {

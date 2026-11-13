@@ -1,8 +1,4 @@
-/**
- * Browser capability descriptor: the Playwright MCP provider ships disabled
- * because a startup failure rejects Session creation.
- * @module @local/dsh-wiring/capabilities/browser
- */
+// Browser capability descriptor. The Playwright provider row ships disabled: a startup failure rejects Session creation.
 
 import { join } from 'node:path'
 
@@ -41,7 +37,7 @@ export const capability = {
   title: { en: 'Browser use', zh: '浏览器' },
   blastRadius: 'session',
   defaultEnabled: false,
-  hint: 'The provider row ships disabled because a startup failure rejects Session creation. Install a Chromium (or run the command below), then enable the row with plugin_manager set_plugin on include:wiring-browser-playwright, and start a new Session — existing Sessions are never adopted.',
+  hint: 'Browser tools need a Chromium: install one, then enable include:wiring-browser-playwright and start a new Session.',
   checks: [
     { id: 'seam', label: 'browser-use seam', kind: 'service', service: 'browserUse', install: '' },
     { id: 'chromium', label: 'Chromium-family browser', kind: 'paths', paths: CHROMIUM_PATHS, install: 'npx playwright install chromium' },

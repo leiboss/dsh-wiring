@@ -19,7 +19,7 @@
 | `tool` | 可以 `defaultEnabled: true` | 无需禁用 |
 | `session` / `ingress` | 必须 `defaultEnabled: false` | 对应行必须 `disabled: true` |
 
-R8（`scripts/check.mjs`）按能力模块遍历校验这条规则；`test/browser.test.mjs` 与 `test/webhook.test.mjs` 另有行块级断言。默认值由影响面决定，**不由本机是否装了 Chrome / 是否有 secret 决定**。
+`scripts/check.mjs` 按能力模块遍历校验这条规则；`test/browser.test.mjs` 与 `test/webhook.test.mjs` 另有行块级断言。默认值由影响面决定，**不由本机是否装了 Chrome / 是否有 secret 决定**。
 
 ## 3. 引擎契约
 

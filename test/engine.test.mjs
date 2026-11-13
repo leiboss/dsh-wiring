@@ -62,14 +62,14 @@ const demo = {
   ],
 }
 
-test('R1 apply() performs no probes', () => {
+test('apply() performs no probes', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
   assert.equal(harness.calls.length, 0)
   assert.deepEqual([...harness.registered.keys()], ['lsp_status', 'browser_status', 'webhook_status'])
 })
 
-test('R2 a hung probe times out without affecting siblings', async () => {
+test('a hung probe times out without affecting siblings', async () => {
   const harness = makeContext({
     resolve: () => new Promise(() => {}),
     services: { fast: {} },
@@ -83,7 +83,7 @@ test('R2 a hung probe times out without affecting siblings', async () => {
   assert.equal(report.checks[1].detail, 'mounted')
 })
 
-test('R3 a throwing resolver still yields a complete report', async () => {
+test('a throwing resolver still yields a complete report', async () => {
   const harness = makeContext({
     resolve: () => {
       throw new Error('boom')
@@ -99,7 +99,7 @@ test('R3 a throwing resolver still yields a complete report', async () => {
   assert.equal(report.checks[1].ok, true)
 })
 
-test('R4 disposal followed by apply() leaves exactly one registration per capability', () => {
+test('disposal followed by apply() leaves exactly one registration per capability', () => {
   const harness = makeContext({ resolve: okResolver })
   apply(harness.ctx)
   assert.equal(harness.registered.size, 3)
@@ -111,7 +111,7 @@ test('R4 disposal followed by apply() leaves exactly one registration per capabi
   assert.equal(harness.registered.size, 3)
 })
 
-test('R7 a missing seam service degrades instead of throwing', async () => {
+test('a missing seam service degrades instead of throwing', async () => {
   const harness = makeContext({ resolve: okResolver })
   const tool = defineStatusTool(harness.ctx, demo, { timeoutMs: 50 })
   const report = await tool.execute({}, {})

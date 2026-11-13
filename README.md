@@ -68,7 +68,7 @@ src/index.js                引擎：runChecks / defineStatusTool / formatReport
 src/rule.js                 pull_request 规则（@leiboss/dsh-wiring/rule 子路径行）
 src/capabilities/           LSP / browser / webhook 描述符
 cordis.patch.yml            九行挂载 + Python/Go/Rust 可复制注释块
-scripts/check.mjs           静态验收（R5/R6/R8 + 包契约）
+scripts/check.mjs           静态验收（包契约、无宿主 import、危险能力默认关闭）
 scripts/sign.mjs            本地构造 GitHub 签名请求
 test/                       引擎与各能力单测（node:test）
 docs/VERIFY.md              安装后人工验收

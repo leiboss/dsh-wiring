@@ -1,11 +1,4 @@
-/**
- * dsh-wiring engine: bounded, read-only capability probes plus one
- * `<capability>_status` doctor tool per capability.
- *
- * Zero runtime dependencies. The host supplies every service through the
- * plugin context; this module never imports `@deepseek-ai/*`.
- * @module @local/dsh-wiring
- */
+/** dsh-wiring engine: bounded, read-only probes plus one `<capability>_status` tool per capability. */
 
 import { existsSync } from 'node:fs'
 import { capability as browser } from './capabilities/browser.js'
@@ -16,58 +9,27 @@ const DEFAULT_TIMEOUT_MS = 1500
 const MAX_DETAIL_CHARS = 160
 const TIMEOUT = Symbol('timeout')
 
-/** Every capability this bundle wires. Add a module here to extend the set. */
+// every capability this bundle wires; add a module here to extend the set
 const capabilities = [lsp, browser, webhook]
 
 export const name = 'wiring'
 export const inject = ['subprocess', 'tools']
 
-/**
- * @typedef {object} Check
- * @property {string} id Stable report key.
- * @property {string} label Human-readable label.
- * @property {'command'|'path'|'paths'|'service'} kind Probe strategy.
- * @property {string} [command] Executable to resolve on PATH.
- * @property {string} [path] Absolute path to test for existence.
- * @property {string[]} [paths] kind=paths: candidate absolute paths; any hit passes.
- * @property {string} [service] Context service name to look up.
- * @property {string} [install] Copy-pasteable install command.
- */
-
-/**
- * @typedef {object} CheckResult
- * @property {string} id
- * @property {string} label
- * @property {boolean} ok
- * @property {string} detail Single line, at most 160 characters.
- * @property {string} install
- */
-
-/**
- * @typedef {object} Report
- * @property {string} capability
- * @property {boolean} ok
- * @property {CheckResult[]} checks
- * @property {string} next
- */
-
-/** Collapse whitespace to one line and bound the detail length. */
+// collapse whitespace and bound the detail length
 function oneLine(value) {
   return String(value).replace(/\s+/g, ' ').trim().slice(0, MAX_DETAIL_CHARS)
 }
 
-/** @returns {CheckResult} */
 function resultOf(check, ok, detail) {
   const install = typeof check.install === 'string' ? check.install : ''
   return { id: check.id, label: check.label, ok, detail: oneLine(detail), install }
 }
 
-/** Recognise the host's stable executable-miss error without importing it. */
+// recognise the host's executable-miss error without importing it
 function isNotFound(error) {
   return error?.name === 'SubprocessExecutableNotFoundError' || error?.code === 'ENOENT'
 }
 
-/** Run one probe; `command` is the only asynchronous kind. @returns {Promise<{ok: boolean, detail: string}>} */
 async function probe(ctx, check, signal) {
   switch (check.kind) {
     case 'service':
@@ -94,11 +56,7 @@ async function probe(ctx, check, signal) {
   }
 }
 
-/**
- * Probe one check under its own timeout. Never rejects: every failure becomes
- * a report row, so a broken probe cannot take down the tool call.
- * @returns {Promise<CheckResult>}
- */
+// never rejects: a failed probe becomes a report row
 async function runCheck(ctx, check, timeoutMs) {
   const controller = new AbortController()
   let timer
@@ -122,14 +80,7 @@ async function runCheck(ctx, check, timeoutMs) {
   }
 }
 
-/**
- * Run every check concurrently; each has its own budget, so one slow probe
- * never starves the rest.
- * @param {object} ctx
- * @param {Check[]} checks
- * @param {{timeoutMs?: number}} [options]
- * @returns {Promise<CheckResult[]>}
- */
+/** Run every check concurrently; each has its own timeout budget. */
 export async function runChecks(ctx, checks, options = {}) {
   const timeoutMs =
     Number.isFinite(options.timeoutMs) && options.timeoutMs > 0
@@ -139,7 +90,6 @@ export async function runChecks(ctx, checks, options = {}) {
   return Promise.all(list.map((check) => runCheck(ctx, check, timeoutMs)))
 }
 
-/** Fold raw results into the stable, schema-shaped report. @returns {Report} */
 function buildReport(capability, results) {
   const firstFailure = results.find((result) => !result.ok)
   return {
@@ -151,12 +101,7 @@ function buildReport(capability, results) {
   }
 }
 
-/**
- * Render a report as plain text for the model.
- * @param {object} capability
- * @param {Report} report
- * @returns {string}
- */
+/** Render a report as plain text for the model. */
 export function formatReport(capability, report) {
   const title = capability?.title?.en ?? report.capability
   const lines = [`${report.capability} (${title}): ${report.ok ? 'ready' : 'degraded'}`]
@@ -170,7 +115,6 @@ export function formatReport(capability, report) {
   return lines.join('\n')
 }
 
-/** The exact canonical output contract every doctor shares. */
 const OUTPUT_SCHEMA = {
   type: 'object',
   properties: {
@@ -198,14 +142,7 @@ const OUTPUT_SCHEMA = {
   additionalProperties: false,
 }
 
-/**
- * Build the read-only `<capability>_status` tool. Probing starts only when the
- * model calls `execute`, and `execute` never rejects.
- * @param {object} ctx
- * @param {object} capability
- * @param {{timeoutMs?: number}} [options]
- * @returns {object} A hand-written ToolDefinition.
- */
+/** Build the read-only `<capability>_status` tool; `execute` never rejects. */
 export function defineStatusTool(ctx, capability, options = {}) {
   const timeoutMs =
     Number.isFinite(options.timeoutMs) && options.timeoutMs > 0
@@ -243,11 +180,7 @@ export function defineStatusTool(ctx, capability, options = {}) {
   }
 }
 
-/**
- * Register one doctor tool per capability inside the host effect scope, so a
- * plugin reload disposes and re-registers exactly once.
- * @param {object} ctx
- */
+/** Register one doctor tool per capability in the host effect scope. */
 export function apply(ctx) {
   for (const capability of capabilities) {
     ctx.effect(() =>

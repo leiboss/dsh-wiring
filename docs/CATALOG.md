@@ -52,7 +52,7 @@ dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 
 1. 挂载的是官方包，不新增工具面；价值在失败可解释与默认值。
 2. 每个能力都有只读诊断工具（`lsp_status` / `browser_status` / `webhook_status`），失败时给出可复制的修复命令。
-3. 危险能力默认关闭：Playwright provider 与签名 webhook 入口都在 patch 里 `disabled: true`，由 R8 与测试守卫。
+3. 危险能力默认关闭：Playwright provider 与签名 webhook 入口都在 patch 里 `disabled: true`，由静态检查与测试守卫。
 
 ## PR 正文（可直接粘贴）
 
@@ -97,5 +97,5 @@ dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 
 1. 挂载的是官方包，不新增工具面；价值在失败可解释与默认值。
 2. 每个能力都有只读诊断工具（`lsp_status` / `browser_status` / `webhook_status`），失败时给出可复制的修复命令。
-3. 危险能力默认关闭：Playwright provider 与签名 webhook 入口都在 patch 里 `disabled: true`，由 R8 与测试守卫。
+3. 危险能力默认关闭：Playwright provider 与签名 webhook 入口都在 patch 里 `disabled: true`，由静态检查与测试守卫。
 ````

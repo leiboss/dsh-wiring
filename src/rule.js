@@ -30,27 +30,26 @@ export function apply(ctx, config = {}) {
     kind: 'github',
     run(delivery, signal) {
       if (signal.aborted) return null
-      const event = delivery === undefined || delivery === null ? undefined : delivery.event
-      if (event === undefined || event === null || event.name !== 'pull_request') return null
+      const event = delivery?.event
+      if (event?.name !== 'pull_request') return null
 
-      const payload = event.payload === undefined || event.payload === null ? {} : event.payload
+      const payload = event.payload ?? {}
       if (!actions.has(payload.action)) return null
 
-      const pull = payload.pull_request
-      const repository = payload.repository
-      if (pull === undefined || pull === null || repository === undefined || repository === null) return null
+      const { pull_request: pull, repository } = payload
+      if (pull == null || repository == null) return null
 
       const fields = {
         repository: text(repository.full_name),
         number: typeof pull.number === 'number' ? pull.number : null,
         title: text(pull.title),
         url: text(pull.html_url, 2048),
-        author: text(pull.user === undefined || pull.user === null ? '' : pull.user.login, 128),
-        base: text(pull.base === undefined || pull.base === null ? '' : pull.base.ref, 256),
-        head: text(pull.head === undefined || pull.head === null ? '' : pull.head.ref, 256),
+        author: text(pull.user?.login, 128),
+        base: text(pull.base?.ref, 256),
+        head: text(pull.head?.ref, 256),
         body: text(pull.body, 8000),
       }
-      const title = `PR #${fields.number === null ? '?' : fields.number}: ${fields.title || '(untitled)'}`.slice(0, 120)
+      const title = `PR #${fields.number ?? '?'}: ${fields.title || '(untitled)'}`.slice(0, 120)
 
       return {
         workspacePath,

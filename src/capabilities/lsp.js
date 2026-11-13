@@ -1,7 +1,4 @@
-/**
- * LSP capability descriptor: what to probe before the `lsp` tool is trusted.
- * @module @local/dsh-wiring/capabilities/lsp
- */
+// LSP capability descriptor: probes the seam and the TypeScript language server. Enabled by default.
 
 export const capability = {
   id: 'lsp',
