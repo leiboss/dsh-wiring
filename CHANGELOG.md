@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Render `check.hint` only when that check fails, and keep `capability.hint` for always-on guidance.
+- Move the TypeScript 7 note from the LSP capability hint to the `typescript-lib` check hint, so a ready host prints no extra line.
+
 ## 0.4.0
 
 - `lsp_status` now probes the workspace TypeScript install (`typescript-lib`, resolved against the session working directory), removing the "ready but `lsp` fails to initialize" false positive.

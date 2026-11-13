@@ -50,6 +50,12 @@ test('the descriptor also probes the workspace tsserver', () => {
   const check = capability.checks.find((entry) => entry.id === 'typescript-lib')
   assert.equal(check.kind, 'workspacePath')
   assert.equal(check.path, 'node_modules/typescript/lib/tsserver.js')
+  assert.ok(check.hint.includes('TypeScript 7'))
+  assert.equal(capability.hint, undefined)
+
+  const seam = capability.checks.find((entry) => entry.id === 'seam')
+  assert.equal(typeof seam.hint, 'string')
+  assert.ok(seam.hint.length > 0)
 })
 
 test('execute reports ready when both probes pass', async () => {
@@ -67,6 +73,7 @@ test('execute reports ready when both probes pass', async () => {
   assert.equal(report.next, '')
   assert.equal(report.capability, 'lsp')
   assert.equal(report.checks[1].detail, '/usr/local/bin/typescript-language-server')
+  assert.ok(!formatReport(capability, report).includes('TypeScript 7'))
 
   rmSync(workspace, { recursive: true, force: true })
 })
@@ -85,6 +92,10 @@ test('execute reports the install command when the server is missing', async () 
   assert.equal(report.ok, false)
   assert.equal(report.next, 'npm install -g typescript-language-server typescript')
   assert.equal(report.checks[1].detail, 'not found on PATH')
+
+  const text = formatReport(capability, report)
+  assert.ok(text.includes('install: npm install --save-dev typescript@5'))
+  assert.ok(text.includes('TypeScript 7'))
 })
 
 test('execute never rejects when the context is broken', async () => {

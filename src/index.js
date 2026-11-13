@@ -114,9 +114,13 @@ function buildReport(capability, results) {
 export function formatReport(capability, report) {
   const title = capability?.title?.en ?? report.capability
   const lines = [`${report.capability} (${title}): ${report.ok ? 'ready' : 'degraded'}`]
+  const meta = new Map((capability?.checks ?? []).map((check) => [check.id, check]))
   for (const check of report.checks) {
     lines.push(`${check.ok ? 'ok' : 'FAIL'} ${check.label}: ${check.detail}`)
-    if (!check.ok && check.install) lines.push(`  install: ${check.install}`)
+    if (check.ok) continue
+    if (check.install) lines.push(`  install: ${check.install}`)
+    const hint = meta.get(check.id)?.hint
+    if (typeof hint === 'string' && hint !== '') lines.push(`  ${hint}`)
   }
   if (!report.ok && report.next) lines.push(`next: ${report.next}`)
   const hint = (report.hint ?? '').trim()

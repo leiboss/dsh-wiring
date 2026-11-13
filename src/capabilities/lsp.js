@@ -5,7 +5,6 @@ export const capability = {
   title: { en: 'Language servers', zh: '语言服务器' },
   blastRadius: 'tool',
   defaultEnabled: true,
-  hint: 'TypeScript 7 no longer ships lib/tsserver.js; the language server needs typescript@5 installed in the workspace.',
   checks: [
     {
       id: 'seam',
@@ -28,6 +27,7 @@ export const capability = {
       kind: 'workspacePath',
       path: 'node_modules/typescript/lib/tsserver.js',
       install: 'npm install --save-dev typescript@5',
+      hint: 'TypeScript 7 no longer ships lib/tsserver.js; the language server needs typescript@5 installed in the workspace.',
     },
   ],
 }

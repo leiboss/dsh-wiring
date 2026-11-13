@@ -294,6 +294,52 @@ test('execute reads the working directory from the tool execution context', asyn
   rmSync(workspace, { recursive: true, force: true })
 })
 
+test('check hints render only for the checks that fail', () => {
+  const capability = {
+    ...demo,
+    checks: [
+      { id: 'broken', label: 'Broken tool', kind: 'command', command: 'nope', install: 'npm i -g nope' },
+      { id: 'fine', label: 'Fine tool', kind: 'command', command: 'yep', install: '' },
+    ],
+  }
+  const report = {
+    capability: 'demo',
+    ok: false,
+    checks: [
+      { id: 'broken', label: 'Broken tool', ok: false, detail: 'not found on PATH', install: 'npm i -g nope' },
+      { id: 'fine', label: 'Fine tool', ok: true, detail: '/usr/local/bin/yep', install: '' },
+    ],
+    next: 'npm i -g nope',
+    hint: '',
+  }
+  const withHints = {
+    ...capability,
+    checks: [
+      { ...capability.checks[0], hint: 'the broken tool needs a rebuild after install' },
+      { ...capability.checks[1], hint: 'this hint must never show up' },
+    ],
+  }
+
+  const text = formatReport(withHints, report)
+  assert.ok(text.includes('the broken tool needs a rebuild after install'))
+  assert.ok(!text.includes('this hint must never show up'))
+  assert.ok(text.includes('  install: npm i -g nope'))
+})
+
+test('a capability hint renders even when every check passes', () => {
+  const hintText = 'Enable the provider row and start a new Session.'
+  const report = {
+    capability: 'demo',
+    ok: true,
+    checks: [{ id: 'fast', label: 'Fast service', ok: true, detail: 'mounted', install: '' }],
+    next: '',
+    hint: hintText,
+  }
+
+  const text = formatReport({ ...demo, hint: hintText }, report)
+  assert.ok(text.endsWith(`\n\n${hintText}`))
+})
+
 /** Try the local install, then the Windows global DSH layout. */
 async function loadValidator() {
   try {
