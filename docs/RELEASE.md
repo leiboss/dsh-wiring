@@ -28,14 +28,30 @@
 
 ## 两种发布形态
 
-### A. GitHub-only（当前状态）
+### A. npm 发布（当前准备完毕后执行）
 
-`package.json` 仍是 `"private": true` 与 `@local/dsh-wiring` 作用域。受支持的方式：
+`package.json` 已是 `@leiboss/dsh-wiring`、`private: false`、`publishConfig.access: public`，作用域与仓库元数据都已就位：
 
 ```sh
-# 推荐：tarball（已验证）
+npm publish --access public
+npm view @leiboss/dsh-wiring dist.tarball
+curl -I "$(npm view @leiboss/dsh-wiring dist.tarball)"
+```
+
+发布后安装只需一行：
+
+```text
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@<version>"
+```
+
+若改用其他作用域，先跑 `node scripts/rename-scope.mjs --scope <your-scope>` 看差异，再加 `--apply`；`docs/VERIFICATION.md` 是归档记录，不参与改名（脚本已排除），以免篡改历史。
+
+### B. 仅 GitHub 分发（未发布时）
+
+```sh
+# 从源码打 tarball（已验证）
 pnpm pack
-plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiring-<version>.tgz"
 ```
 
 ```sh
@@ -44,26 +60,6 @@ dsh plugin add git+https://github.com/leiboss/dsh-wiring.git
 ```
 
 > 目录安装不受支持（`link:` 不装依赖）。见 [INSTALL.md](INSTALL.md)。
-
-### B. npm
-
-1. 改名到真实作用域（先 dry-run 看差异）：
-
-   ```sh
-   node scripts/rename-scope.mjs --scope <your-scope>
-   node scripts/rename-scope.mjs --scope <your-scope> --apply
-   ```
-
-   `docs/VERIFICATION.md` 是归档记录，不参与改名（脚本已排除），以免篡改历史。
-
-2. 把 `package.json` 的 `"private": true` 改为 `false`。
-3. `npm publish --access public`。
-4. 校验产物可下载：
-
-   ```sh
-   npm view <scope>/dsh-wiring dist.tarball
-   curl -I "$(npm view <scope>/dsh-wiring dist.tarball)"
-   ```
 
 ## 回退
 

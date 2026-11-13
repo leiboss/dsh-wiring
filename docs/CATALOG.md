@@ -7,7 +7,7 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 ## 基本信息
 
 - **仓库**：https://github.com/leiboss/dsh-wiring
-- **npm 包名**：GitHub only（未发布到 npm；当前 `private: true`，作用域 `@local`）
+- **npm 包名**：`@leiboss/dsh-wiring`（v0.3.3；发布前仍可用 tarball 安装）
 - **分类建议**：`dev`
 
 ## 标题与描述
@@ -29,10 +29,15 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 
 ## 安装
 
+```text
+# 推荐：按包名安装（发布后可用）
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+```
+
 ```sh
-# 推荐：tarball（已在真实 profile 中验证）
+# 备选：从源码打 tarball（已验证）
 pnpm pack
-plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiring-<version>.tgz"
 ```
 
 备选：直接从 GitHub 安装（需 git 与网络；**未在本仓库验证**，且请显式用 `git+https`，`github:` 简写默认走 SSH）：
@@ -63,8 +68,14 @@ https://github.com/leiboss/dsh-wiring
 #### 安装
 
 ```text
+# 推荐：按包名安装（发布后可用）
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+```
+
+```sh
+# 备选：从源码打 tarball
 pnpm pack
-plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiring-<version>.tgz"
 ```
 
 或直接从 GitHub 安装：

@@ -12,21 +12,27 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 | Browser（Playwright，provider 默认关闭） | 已接线 | `mcp__playwright-mcp__*` | `browser_status` |
 | GitHub Webhook（签名入口默认关闭） | 已接线 | 新会话（`pull_request` 触发） | `webhook_status` |
 
-安装（在 DSH 会话内执行，路径必须是绝对路径）：
+安装（在 DSH 会话内执行）：
 
 ```text
-pnpm pack                       # 生成 local-dsh-wiring-<version>.tgz
-plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
 # 重启该 profile；bundle patch 在下次启动时生效
+```
+
+首次 `npm publish` 完成前，注册表上还没有这个包；此时用 tarball：
+
+```text
+pnpm pack                       # 生成 leiboss-dsh-wiring-<version>.tgz
+plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiring-<version>.tgz"
 ```
 
 **前置：TypeScript（仅 LSP 需要）**——`dsh-lsp-stdio` 通过 tsserver 工作，tsserver 只从工作区解析。请在会话工作区内执行 `npm install --save-dev typescript@5`，并全局安装 `typescript-language-server`。只装全局 typescript 不够（`Could not find a valid TypeScript installation`）；TypeScript 7 不含 `lib/tsserver.js`，不支持。
 
-**两种受支持方式**见 [docs/INSTALL.md](docs/INSTALL.md)：方式 A 是 tarball（推荐，已验证），也可以从 GitHub 安装（`git+https`，未验证）。发版说明见 [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md)（v0.3.2）。
+**安装方式**见 [docs/INSTALL.md](docs/INSTALL.md)：方式 A 按包名（推荐），方式 B 从源码打 tarball；从 GitHub 直装（`git+https`）未验证。发版说明见 [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md)（v0.3.3）。
 
-**目录安装不被直接支持**：`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会以 `ERR_MODULE_NOT_FOUND` 失败。请用 tarball。
+**目录安装不被直接支持**：`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会以 `ERR_MODULE_NOT_FOUND` 失败。请用 tarball 或按包名安装。
 
-当前包名是 `@local/dsh-wiring`（`private: true`，仅 GitHub 分发）；改到真实 npm 作用域的步骤见 [docs/RELEASE.md](docs/RELEASE.md)。
+当前包名是 `@leiboss/dsh-wiring`（`private: false`，`publishConfig.access: public`）。
 
 > **安装时的 peer 警告是预期行为。** pnpm 会报 `missing peer @deepseek-ai/dsh-llm@0.2.2-rc.1` 一类警告：宿主包由 DSH 加载器从安装目录解析，profile 不安装它们（`autoInstallPeers=false`）。判定安装成功不看警告，只看 `cordis_inspect_query(Config)` 能否查到 `@deepseek-ai/dsh-lsp-stdio`。不要为此在仓库里执行 `npm install`——本包没有开发依赖，也不需要本地安装。
 
@@ -59,7 +65,7 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring
 
 ```
 src/index.js                引擎：runChecks / defineStatusTool / formatReport / apply
-src/rule.js                 pull_request 规则（@local/dsh-wiring/rule 子路径行）
+src/rule.js                 pull_request 规则（@leiboss/dsh-wiring/rule 子路径行）
 src/capabilities/           LSP / browser / webhook 描述符
 cordis.patch.yml            九行挂载 + Python/Go/Rust 可复制注释块
 scripts/check.mjs           静态验收（R5/R6/R8 + 包契约）

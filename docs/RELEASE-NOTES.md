@@ -21,7 +21,7 @@
 
 ### 安装
 
-见 [INSTALL.md](INSTALL.md)：**目录安装不受支持**（pnpm `link:` 不装依赖），用 tarball 或先 `dsh plugin add` 七个官方包。
+见 [INSTALL.md](INSTALL.md)：**目录安装不受支持**（pnpm `link:` 不装依赖）；推荐 `plugin_manager action: install_bundle target: "@leiboss/dsh-wiring@0.3.3"`。
 
 ### 已知限制
 

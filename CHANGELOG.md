@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+- Publish-ready manifest: license, repository, homepage, bugs, keywords, `publishConfig.access`, and a `prepack` check.
+- Rename the package scope from `@local` to `@leiboss` and unpublish the `private` flag.
+- Document the one-line install (`install_bundle target="@leiboss/dsh-wiring@<version>"`) as the supported path.
+
 ## 0.3.2
 
 - 修复 `rename-scope` 在 Windows 上未排除归档记录：排除集合按文件名比较，不再拼路径（`join` 在 Windows 产出 `\`）。

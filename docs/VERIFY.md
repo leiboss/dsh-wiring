@@ -23,9 +23,9 @@ pnpm pack
 plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
 ```
 
-**期望**：安装成功；`@local/dsh-wiring` 出现在该 profile 的 bundle 列表；`wiring-*` 行数为 9（其中 2 个 disabled）；安装日志中的 `missing peer` 警告属预期。
+**期望**：安装成功；`@leiboss/dsh-wiring` 出现在该 profile 的 bundle 列表；`wiring-*` 行数为 9（其中 2 个 disabled）；安装日志中的 `missing peer` 警告属预期。
 
-**证据**：`plugin_manager` 返回的安装结果（含包名与当前版本，见 `package.json`）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@local/dsh-wiring`。
+**证据**：`plugin_manager` 返回的安装结果（含包名与当前版本，见 `package.json`）；`<profile>/package.json` 的 `dsh.profile.bundles` 出现 `@leiboss/dsh-wiring`。
 
 ---
 
@@ -114,7 +114,7 @@ plugin_manager listConfigs
 
 ## 7. 卸载后工具消失
 
-**操作**：通过 `plugin_manager` 卸载 `@local/dsh-wiring`，重启 profile，再调用 `Tool.listTools`。
+**操作**：通过 `plugin_manager` 卸载 `@leiboss/dsh-wiring`，重启 profile，再调用 `Tool.listTools`。
 
 **期望**：`lsp` 与 `lsp_status` 都消失（四行 patch 随 bundle 一起移除）；profile 仍能正常启动。
 

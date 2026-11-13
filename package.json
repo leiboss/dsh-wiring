@@ -1,7 +1,7 @@
 {
-  "name": "@local/dsh-wiring",
-  "version": "0.3.2",
-  "private": true,
+  "name": "@leiboss/dsh-wiring",
+  "version": "0.3.3",
+  "private": false,
   "type": "module",
   "description": "Wire shipped-but-unmounted DeepSeek Harness capabilities and explain what is missing.",
   "exports": {
@@ -21,5 +21,23 @@
     "@deepseek-ai/dsh-tool-lsp": "0.2.2-rc.1",
     "@deepseek-ai/dsh-webhook": "0.2.2-rc.1",
     "@deepseek-ai/dsh-webhook-github": "0.2.2-rc.1"
-  }
+  },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/leiboss/dsh-wiring.git" },
+  "homepage": "https://github.com/leiboss/dsh-wiring#readme",
+  "bugs": { "url": "https://github.com/leiboss/dsh-wiring/issues" },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "lsp",
+    "language-server",
+    "browser-use",
+    "webhook",
+    "github-webhook",
+    "diagnostics"
+  ],
+  "publishConfig": { "access": "public" },
+  "scripts": { "prepack": "node scripts/check.mjs" }
 }

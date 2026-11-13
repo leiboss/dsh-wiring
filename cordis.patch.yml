@@ -41,7 +41,7 @@
       name: '@deepseek-ai/dsh-tool-lsp'
 
     - id: wiring-doctor
-      name: '@local/dsh-wiring'
+      name: '@leiboss/dsh-wiring'
 
     - id: wiring-browser-use
       name: '@deepseek-ai/dsh-browser-use'
@@ -57,7 +57,7 @@
       name: '@deepseek-ai/dsh-webhook'
 
     - id: wiring-webhook-rule
-      name: '@local/dsh-wiring/rule'
+      name: '@leiboss/dsh-wiring/rule'
       config:
         workspacePath: ''
         agentPreset: standard

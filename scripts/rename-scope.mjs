@@ -12,7 +12,10 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const OLD = '@local/dsh-wiring'
+/** The name currently in package.json is the source of every rewrite. */
+function readCurrentName(root) {
+  return JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name
+}
 
 /** Archived verification records are historical: never rewrite them. */
 const EXCLUDED_DOCS = new Set(['VERIFICATION.md'])
@@ -23,28 +26,30 @@ function toPosix(id) {
 }
 
 /** package.json: only the top-level name field. */
-function renamePackageJson(line, target) {
-  return /^\s*"name"\s*:/.test(line) ? line.replaceAll(OLD, target) : line
+function renamePackageJson(line, from, target) {
+  return /^\s*"name"\s*:/.test(line) ? line.replaceAll(from, target) : line
 }
 
-/** cordis.patch.yml: only the two `name:` row values owned by this package. */
-function renamePatch(line, target) {
-  return /^\s*name:\s*'@local\/dsh-wiring(\/rule)?'\s*$/.test(line) ? line.replaceAll(OLD, target) : line
+/** cordis.patch.yml: only the `name:` row values owned by this package. */
+function renamePatch(line, from, target) {
+  const value = line.trim().match(/^name:\s*'([^']+)'\s*$/)?.[1]
+  if (value !== from && value !== `${from}/rule`) return line
+  return line.replaceAll(from, target)
 }
 
 /** Markdown: every occurrence. */
-function renameMarkdown(line, target) {
-  return line.includes(OLD) ? line.replaceAll(OLD, target) : line
+function renameMarkdown(line, from, target) {
+  return line.includes(from) ? line.replaceAll(from, target) : line
 }
 
-function collect(root, id, transform, target) {
+function collect(root, id, transform, from, target) {
   const path = join(root, id)
   if (!existsSync(path)) return []
   const file = toPosix(id)
   const lines = readFileSync(path, 'utf8').split('\n')
   const changes = []
   for (let index = 0; index < lines.length; index += 1) {
-    const next = transform(lines[index], target)
+    const next = transform(lines[index], from, target)
     if (next !== lines[index]) changes.push({ file, line: index + 1, before: lines[index], after: next })
   }
   return changes
@@ -57,17 +62,18 @@ function collect(root, id, transform, target) {
  * @returns {{ file: string, line: number, before: string, after: string }[]}
  */
 export function planRename(root, scope) {
+  const from = readCurrentName(root)
   const target = `@${String(scope).replace(/^@/, '')}/dsh-wiring`
   const plan = [
-    ...collect(root, 'package.json', renamePackageJson, target),
-    ...collect(root, 'cordis.patch.yml', renamePatch, target),
-    ...collect(root, 'README.md', renameMarkdown, target),
+    ...collect(root, 'package.json', renamePackageJson, from, target),
+    ...collect(root, 'cordis.patch.yml', renamePatch, from, target),
+    ...collect(root, 'README.md', renameMarkdown, from, target),
   ]
   const docs = join(root, 'docs')
   if (existsSync(docs)) {
     for (const entry of readdirSync(docs)) {
       if (!entry.endsWith('.md') || EXCLUDED_DOCS.has(entry)) continue
-      plan.push(...collect(root, join('docs', entry), renameMarkdown, target))
+      plan.push(...collect(root, join('docs', entry), renameMarkdown, from, target))
     }
   }
   return plan
@@ -96,6 +102,7 @@ function main() {
   }
 
   const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+  const from = readCurrentName(root)
   const plan = planRename(root, scope)
 
   if (plan.length === 0) {
@@ -104,7 +111,7 @@ function main() {
   }
 
   const target = `@${scope}/dsh-wiring`
-  console.log(`${apply ? 'apply' : 'dry-run'}: ${OLD} -> ${target}`)
+  console.log(`${apply ? 'apply' : 'dry-run'}: ${from} -> ${target}`)
   for (const change of plan) {
     console.log(`${change.file}:${change.line}  ${change.before.trim()}`)
     console.log(`${change.file}:${change.line}  ${change.after.trim()}`)
@@ -118,7 +125,7 @@ function main() {
     const path = join(root, file)
     const transform = TRANSFORMS[file] ?? renameMarkdown
     const lines = readFileSync(path, 'utf8').split('\n')
-    writeFileSync(path, lines.map((line) => transform(line, target)).join('\n'), 'utf8')
+    writeFileSync(path, lines.map((line) => transform(line, from, target)).join('\n'), 'utf8')
   }
 
   try {
@@ -126,7 +133,7 @@ function main() {
       cwd: root,
       stdio: 'inherit',
     })
-    console.log(`applied: ${OLD} -> ${target}`)
+    console.log(`applied: ${from} -> ${target}`)
   } catch {
     console.error('check.mjs failed after rename; roll back with: git checkout -- .')
     process.exit(1)

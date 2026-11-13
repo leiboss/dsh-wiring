@@ -17,32 +17,34 @@ npm install -g typescript-language-server
 不要用 TypeScript 7：`typescript@7` 已不包含 `lib/tsserver.js`，同样会失败。
 若必须使用其他 TypeScript 位置，可在 `wiring-lsp-typescript` 行的 `config.servers.typescript.initializationOptions` 里设置 `tsserver.path`。
 
-## 方式 A（推荐）：tarball
+## 方式 A（推荐）：按包名安装
 
-```powershell
-pnpm pack                       # 生成 local-dsh-wiring-<version>.tgz
-plugin_manager  action: install_bundle  target: "<绝对路径>/local-dsh-wiring-<version>.tgz"
+```text
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
 ```
 
-tarball 走正常的依赖解析，7 个官方包会一并落进 profile 的 `node_modules`；宿主 peer（`cordis`、`dsh-llm`、`dsh-fs`…）仍由 DSH 加载器从安装目录解析。
+`install_bundle` 会经由包管理器解析依赖，本包的 7 个官方依赖一并落入 profile；宿主 peer（`cordis`、`dsh-llm`、`dsh-fs`…）仍由 DSH 加载器从安装目录解析。
 
-## 目录安装（不受支持，仅记录现象）
+该包已具备发布元数据（`publishConfig.access: public`）；**首次 `npm publish` 完成前，注册表上还没有这个包**，请先用方式 B。
 
-下面的做法有时能让 `link:` 解析到依赖，但它**不是受支持的安装路径**——本包的 7 个官方依赖仍需手工维护，且与宿主版本线容易漂移。请用方式 A。
+## 方式 B（从源码）：tarball
 
 ```powershell
-dsh plugin --profile web add `
-  @deepseek-ai/dsh-lsp@0.2.2-rc.1 `
-  @deepseek-ai/dsh-lsp-stdio@0.2.2-rc.1 `
-  @deepseek-ai/dsh-tool-lsp@0.2.2-rc.1 `
-  @deepseek-ai/dsh-browser-use@0.2.2-rc.1 `
-  @deepseek-ai/dsh-experimental-browser-use-playwright-mcp@0.2.2-rc.1 `
-  @deepseek-ai/dsh-webhook@0.2.2-rc.1 `
-  @deepseek-ai/dsh-webhook-github@0.2.2-rc.1
+pnpm pack                       # 生成 leiboss-dsh-wiring-<version>.tgz
+plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiring-<version>.tgz"
+```
+
+tarball 走正常的依赖解析，效果与方式 A 相同，适合本地验证或未发布时使用。
+
+## 不受支持：目录安装
+
+```powershell
 plugin_manager  action: install_bundle  target: "<仓库绝对路径>"
 ```
 
-## 从 GitHub 安装（未验证）
+`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会 `ERR_MODULE_NOT_FOUND`。即使手工预装这 7 个包能让 `link:` 解析到它们，也只是绕行：依赖需要人工维护，且容易与宿主版本线漂移。
+
+## 未验证：从 GitHub 直装
 
 ```sh
 dsh plugin add git+https://github.com/leiboss/dsh-wiring.git

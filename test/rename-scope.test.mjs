@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -6,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { planRename } from '../scripts/rename-scope.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const currentScope = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name.slice(1).split('/')[0]
 
 test('archived verification records are never renamed', () => {
   const plan = planRename(root, 'example')
@@ -13,7 +15,7 @@ test('archived verification records are never renamed', () => {
 })
 
 test('the current scope is a no-op', () => {
-  assert.deepEqual(planRename(root, 'local'), [])
+  assert.deepEqual(planRename(root, currentScope), [])
 })
 
 test('the plan covers package.json, the patch, and the README', () => {
