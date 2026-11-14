@@ -4,7 +4,7 @@
 
 **Wire what ships. Diagnose what doesn't.**
 
-DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepseek-ai/dsh-lsp-stdio`、`@deepseek-ai/dsh-tool-lsp`，但 `dsh-base` 与 `dsh-web-app` 的 patch 里没有任何 lsp 行：默认安装既没有 `lsp` 工具，也没有任何东西告诉你它为什么不在。本包把这三行接上，并提供一个只读的 `lsp_status` 诊断。
+DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 LSP、浏览器与 GitHub webhook 三组官方包，但 `dsh-base` 与 `dsh-web-app` 的 patch 里没有对应的行：默认安装既没有 `lsp` 工具、没有浏览器 provider，也没有 webhook 入口，更没有任何东西告诉你它们为什么不在。本包把这些行接上，并为每个能力配一个只读的 `<capability>_status` 诊断。
 
 | 能力 | 状态 | 模型工具 | 诊断工具 |
 |---|---|---|---|
@@ -15,11 +15,11 @@ DeepSeek Harness 0.2.2-rc.1 随 npm 发布了 `@deepseek-ai/dsh-lsp`、`@deepsee
 安装（在 DSH 会话内执行）：
 
 ```text
-plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.4.1"
 # 重启该 profile；bundle patch 在下次启动时生效
 ```
 
-首次 `npm publish` 完成前，注册表上还没有这个包；此时用 tarball：
+包已发布到 npm（`latest` 为 `0.4.1`）。需要固定版本或离线分发时，用 tarball：
 
 ```text
 pnpm pack                       # 生成 leiboss-dsh-wiring-<version>.tgz
@@ -28,7 +28,7 @@ plugin_manager  action: install_bundle  target: "<绝对路径>/leiboss-dsh-wiri
 
 **前置：TypeScript（仅 LSP 需要）**——`dsh-lsp-stdio` 通过 tsserver 工作，tsserver 只从工作区解析。请在会话工作区内执行 `npm install --save-dev typescript@5`，并全局安装 `typescript-language-server`。只装全局 typescript 不够（`Could not find a valid TypeScript installation`）；TypeScript 7 不含 `lib/tsserver.js`，不支持。
 
-**安装方式**见 [docs/INSTALL.md](docs/INSTALL.md)：方式 A 按包名（推荐），方式 B 从源码打 tarball；从 GitHub 直装（`git+https`）未验证。发版说明见 [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md)（v0.3.3）。
+**安装方式**见 [docs/INSTALL.md](docs/INSTALL.md)：方式 A 按包名（推荐），方式 B 从源码打 tarball；从 GitHub 直装（`git+https`）未验证。发版说明见 [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md)（v0.4.1）。
 
 **目录安装不被直接支持**：`install_bundle` 对目录注册的是 pnpm `link:`，被链接的包不会安装自己的 dependencies，7 个官方依赖不会进 profile，相关行会以 `ERR_MODULE_NOT_FOUND` 失败。请用 tarball 或按包名安装。
 

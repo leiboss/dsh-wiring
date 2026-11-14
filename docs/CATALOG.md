@@ -1,4 +1,4 @@
-Status: ready to submit — install verified (tarball) and LSP navigation verified; webhook ingress and browser provider remain opt-in.
+Status: ready to submit — published as @leiboss/dsh-wiring@0.4.1; install verified (tarball) and LSP navigation verified; webhook ingress and browser provider remain opt-in.
 
 # Catalog submission material
 
@@ -7,7 +7,7 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 ## 基本信息
 
 - **仓库**：https://github.com/leiboss/dsh-wiring
-- **npm 包名**：`@leiboss/dsh-wiring`（v0.3.3；发布前仍可用 tarball 安装）
+- **npm 包名**：`@leiboss/dsh-wiring`（v0.4.1，已发布）
 - **分类建议**：`dev`
 
 ## 标题与描述
@@ -31,7 +31,7 @@ Status: ready to submit — install verified (tarball) and LSP navigation verifi
 
 ```text
 # 推荐：按包名安装
-plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.4.1"
 ```
 
 ```sh
@@ -69,7 +69,7 @@ https://github.com/leiboss/dsh-wiring
 
 ```text
 # 推荐：按包名安装
-plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.4.1"
 ```
 
 ```sh

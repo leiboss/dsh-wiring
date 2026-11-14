@@ -20,12 +20,12 @@ npm install -g typescript-language-server
 ## 方式 A（推荐）：按包名安装
 
 ```text
-plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.3.3"
+plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@0.4.1"
 ```
 
 `install_bundle` 会经由包管理器解析依赖，本包的 7 个官方依赖一并落入 profile；宿主 peer（`cordis`、`dsh-llm`、`dsh-fs`…）仍由 DSH 加载器从安装目录解析。
 
-该包已具备发布元数据（`publishConfig.access: public`）；**首次 `npm publish` 完成前，注册表上还没有这个包**，请先用方式 B。
+该包已发布到 npm（`latest` 为 `0.4.1`，元数据含 `publishConfig.access: public`）；`install_bundle` 会按包名解析并安装依赖。
 
 ## 方式 B（从源码）：tarball
 

@@ -5,11 +5,11 @@
 ## 版本策略
 
 - 当前处于 `0.x`：次版本（`0.2.0` → `0.3.0`）承载新能力与破坏性变更；补丁版本只修 bug 与文档。
-- 三个官方依赖（LSP、browser、webhook）必须与 `engines.dsh` **同一条版本线**（当前 `0.2.2-rc.1`）。宿主升级时同步升级这五个 `@deepseek-ai/dsh-*` 依赖，并重跑全部测试；不要按 `latest` dist-tag 取版本。
+- 三组官方依赖（LSP、browser、webhook，共七个 `@deepseek-ai/dsh-*` 包）必须与 `engines.dsh` **同一条版本线**（当前 `0.2.2-rc.1`）。宿主升级时同步升级这七个依赖，并重跑全部测试；不要按 `latest` dist-tag 取版本。
 
 ## 发布前检查单
 
-1. 六组测试全绿（**在 Windows 与 Linux 都要跑**，CI 矩阵已覆盖两个平台）：
+1. 五组测试 + 静态检查全绿（**在 Windows 与 Linux 都要跑**，CI 矩阵已覆盖两个平台）：
 
    ```sh
    node test/engine.test.mjs
@@ -28,12 +28,12 @@
 
 ## 两种发布形态
 
-### A. npm 发布（当前准备完毕后执行）
+### A. npm 发布（已发布 `0.4.1`）
 
-`package.json` 已是 `@leiboss/dsh-wiring`、`private: false`、`publishConfig.access: public`，作用域与仓库元数据都已就位：
+`package.json` 已是 `@leiboss/dsh-wiring`、`private: false`、`publishConfig.access: public`，作用域与仓库元数据都已就位。后续版本沿用同一流程：
 
 ```sh
-npm publish --access public
+npm publish --access public --registry https://registry.npmjs.org
 npm view @leiboss/dsh-wiring dist.tarball
 curl -I "$(npm view @leiboss/dsh-wiring dist.tarball)"
 ```
@@ -43,6 +43,8 @@ curl -I "$(npm view @leiboss/dsh-wiring dist.tarball)"
 ```text
 plugin_manager  action: install_bundle  target: "@leiboss/dsh-wiring@<version>"
 ```
+
+发布后立即打 tag 并指向**被发布的那个 commit**（不要指向其后的文档提交），保证 npm tarball 与仓库可追溯。
 
 若改用其他作用域，先跑 `node scripts/rename-scope.mjs --scope <your-scope>` 看差异，再加 `--apply`；`docs/VERIFICATION.md` 是归档记录，不参与改名（脚本已排除），以免篡改历史。
 
